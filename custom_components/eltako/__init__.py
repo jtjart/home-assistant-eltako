@@ -2,19 +2,13 @@
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers.reload import async_reload_integration_platforms
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import (
-    entity_registry as er,
-    device_registry as dr,
-    entity_platform as pl,
-)
+from homeassistant.helpers.typing import ConfigType
 
-from .const import *
-from .schema import CONFIG_SCHEMA
 from . import config_helpers
+from .const import *
 from .gateway import *
+from .schema import CONFIG_SCHEMA
 
 LOG_PREFIX = "Eltako Integration Setup"
 

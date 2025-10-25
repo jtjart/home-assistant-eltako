@@ -1,16 +1,15 @@
 """Support for Eltako sensors."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
 
-from eltakobus.util import AddressExpression, b2s
 from eltakobus.eep import *
 from eltakobus.message import ESP2Message
+from eltakobus.util import AddressExpression, b2s
 
-from . import config_helpers
-
-
+from homeassistant import config_entries
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -18,34 +17,31 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import (
+    CONF_LANGUAGE,
+    LIGHT_LUX,
     PERCENTAGE,
     STATE_CLOSED,
     STATE_OPEN,
-    LIGHT_LUX,
-    UnitOfPower,
-    UnitOfTemperature,
-    UnitOfSpeed,
+    Platform,
+    UnitOfElectricPotential,
     UnitOfEnergy,
+    UnitOfPower,
+    UnitOfSpeed,
+    UnitOfTemperature,
     UnitOfVolume,
     UnitOfVolumeFlowRate,
-    Platform,
-    PERCENTAGE,
-    CONF_LANGUAGE,
-    UnitOfElectricPotential,
 )
-from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers import entity_registry as er
 
-from .device import *
+from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
 from .config_helpers import *
-from .gateway import EnOceanGateway
 from .const import *
-from . import get_gateway_from_hass, get_device_config_for_gateway
+from .device import *
+from .gateway import EnOceanGateway
 
 DEFAULT_DEVICE_NAME_WINDOW_HANDLE = "Window handle"
 DEFAULT_DEVICE_NAME_WEATHER_STATION = "Weather station"
@@ -82,6 +78,7 @@ SENSOR_TYPE_ILLUMINANCE = "illuminance"
 @dataclass
 class EltakoSensorEntityDescription(SensorEntityDescription):
     """Describes Eltako sensor entity."""
+
 
 SENSOR_DESC_BATTERY_VOLTAGE = EltakoSensorEntityDescription(
     key=SENSOR_TYPE_BATTERY_VOLTAGE,
@@ -148,11 +145,11 @@ SENSOR_DESC_WINDOWHANDLE = EltakoSensorEntityDescription(
     key=SENSOR_TYPE_WINDOWHANDLE,
     name="Window handle",
     icon="mdi:window-open-variant",
-    device_class='window',
+    device_class="window",
     native_unit_of_measurement=None,
     suggested_display_precision=None,
     suggested_unit_of_measurement=None,
-    state_class=None
+    state_class=None,
 )
 
 SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_DAWN = EltakoSensorEntityDescription(
@@ -294,88 +291,274 @@ async def async_setup_entry(
     config: ConfigType = get_device_config_for_gateway(hass, config_entry, gateway)
 
     entities: list[EltakoEntity] = []
-    
+
     platform = Platform.SENSOR
     if platform in config:
         for entity_config in config[platform]:
             try:
                 dev_conf = DeviceConf(entity_config, [CONF_METER_TARIFFS])
                 dev_name = dev_conf.name
-            
+
                 if dev_conf.eep in [A5_13_01]:
                     if dev_name == dev_conf.name:
                         dev_name = DEFAULT_DEVICE_NAME_WEATHER_STATION
-                    
-                    entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_DAWN))
-                    entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_TEMPERATURE))
-                    entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_WIND_SPEED))
-                    entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_RAIN))
-                    entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_WEST))
-                    entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_CENTRAL))
-                    entities.append(EltakoWeatherStation(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_EAST))
-                    
+
+                    entities.append(
+                        EltakoWeatherStation(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_DAWN,
+                        )
+                    )
+                    entities.append(
+                        EltakoWeatherStation(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WEATHER_STATION_TEMPERATURE,
+                        )
+                    )
+                    entities.append(
+                        EltakoWeatherStation(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WEATHER_STATION_WIND_SPEED,
+                        )
+                    )
+                    entities.append(
+                        EltakoWeatherStation(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WEATHER_STATION_RAIN,
+                        )
+                    )
+                    entities.append(
+                        EltakoWeatherStation(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_WEST,
+                        )
+                    )
+                    entities.append(
+                        EltakoWeatherStation(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_CENTRAL,
+                        )
+                    )
+                    entities.append(
+                        EltakoWeatherStation(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WEATHER_STATION_ILLUMINANCE_EAST,
+                        )
+                    )
+
                 elif dev_conf.eep in [F6_10_00]:
                     if dev_name == "":
                         dev_name = DEFAULT_DEVICE_NAME_WINDOW_HANDLE
-                    
-                    entities.append(EltakoWindowHandle(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WINDOWHANDLE))
-                    
+
+                    entities.append(
+                        EltakoWindowHandle(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_WINDOWHANDLE,
+                        )
+                    )
+
                 elif dev_conf.eep in [A5_12_01]:
                     if dev_name == "":
                         dev_name = DEFAULT_DEVICE_NAME_ELECTRICITY_METER
-                    
+
                     for tariff in dev_conf.get(CONF_METER_TARIFFS, []):
-                        entities.append(EltakoMeterSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_ELECTRICITY_CUMULATIVE, tariff=(tariff - 1)))
+                        entities.append(
+                            EltakoMeterSensor(
+                                platform,
+                                gateway,
+                                dev_conf.id,
+                                dev_name,
+                                dev_conf.eep,
+                                SENSOR_DESC_ELECTRICITY_CUMULATIVE,
+                                tariff=(tariff - 1),
+                            )
+                        )
                     _tariff_in_name = dev_conf.get(CONF_METER_TARIFFS, []) != []
-                    entities.append(EltakoMeterSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_ELECTRICITY_CURRENT, tariff=0, tariff_in_name=_tariff_in_name))
+                    entities.append(
+                        EltakoMeterSensor(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_ELECTRICITY_CURRENT,
+                            tariff=0,
+                            tariff_in_name=_tariff_in_name,
+                        )
+                    )
 
                 elif dev_conf.eep in [A5_12_02]:
                     if dev_name == "":
                         dev_name = DEFAULT_DEVICE_NAME_GAS_METER
-                        
+
                     for tariff in dev_conf.get(CONF_METER_TARIFFS, []):
-                        entities.append(EltakoMeterSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_GAS_CUMULATIVE, tariff=(tariff - 1)))
-                        entities.append(EltakoMeterSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_GAS_CURRENT, tariff=(tariff - 1)))
+                        entities.append(
+                            EltakoMeterSensor(
+                                platform,
+                                gateway,
+                                dev_conf.id,
+                                dev_name,
+                                dev_conf.eep,
+                                SENSOR_DESC_GAS_CUMULATIVE,
+                                tariff=(tariff - 1),
+                            )
+                        )
+                        entities.append(
+                            EltakoMeterSensor(
+                                platform,
+                                gateway,
+                                dev_conf.id,
+                                dev_name,
+                                dev_conf.eep,
+                                SENSOR_DESC_GAS_CURRENT,
+                                tariff=(tariff - 1),
+                            )
+                        )
 
                 elif dev_conf.eep in [A5_12_03]:
                     if dev_name == "":
                         dev_name = DEFAULT_DEVICE_NAME_WATER_METER
-                        
+
                     for tariff in dev_conf.get(CONF_METER_TARIFFS, []):
-                        entities.append(EltakoMeterSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WATER_CUMULATIVE, tariff=(tariff - 1)))
-                        entities.append(EltakoMeterSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, SENSOR_DESC_WATER_CURRENT, tariff=(tariff - 1)))
+                        entities.append(
+                            EltakoMeterSensor(
+                                platform,
+                                gateway,
+                                dev_conf.id,
+                                dev_name,
+                                dev_conf.eep,
+                                SENSOR_DESC_WATER_CUMULATIVE,
+                                tariff=(tariff - 1),
+                            )
+                        )
+                        entities.append(
+                            EltakoMeterSensor(
+                                platform,
+                                gateway,
+                                dev_conf.id,
+                                dev_name,
+                                dev_conf.eep,
+                                SENSOR_DESC_WATER_CURRENT,
+                                tariff=(tariff - 1),
+                            )
+                        )
 
                 elif dev_conf.eep in [A5_04_01, A5_04_02, A5_04_03, A5_10_12]:
-                    
-                    entities.append(EltakoTemperatureSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
-                    entities.append(EltakoHumiditySensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
+                    entities.append(
+                        EltakoTemperatureSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
+                    entities.append(
+                        EltakoHumiditySensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
                     if dev_conf.eep in [A5_10_12]:
-                        entities.append(EltakoTargetTemperatureSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
+                        entities.append(
+                            EltakoTargetTemperatureSensor(
+                                platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                            )
+                        )
 
                 elif dev_conf.eep in [A5_10_06, A5_10_03]:
-                    entities.append(EltakoTemperatureSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
-                    entities.append(EltakoTargetTemperatureSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
-                
+                    entities.append(
+                        EltakoTemperatureSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
+                    entities.append(
+                        EltakoTargetTemperatureSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
+
                 elif dev_conf.eep in [A5_09_0C]:
-                ### Eltako FLGTF only supports VOCT Total
+                    ### Eltako FLGTF only supports VOCT Total
                     for t in VOC_SubstancesType:
                         if t.index in entity_config[CONF_VOC_TYPE_INDEXES]:
-                            entities.append(EltakoAirQualitySensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep, t, entity_config[CONF_LANGUAGE]))
+                            entities.append(
+                                EltakoAirQualitySensor(
+                                    platform,
+                                    gateway,
+                                    dev_conf.id,
+                                    dev_name,
+                                    dev_conf.eep,
+                                    t,
+                                    entity_config[CONF_LANGUAGE],
+                                )
+                            )
 
                 elif dev_conf.eep in [A5_07_01]:
-                    entities.append(EltakoPirSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
-                    entities.append(EltakoVoltageSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
+                    entities.append(
+                        EltakoPirSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
+                    entities.append(
+                        EltakoVoltageSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
 
                 elif dev_conf.eep in [A5_08_01]:
-                    entities.append(EltakoTemperatureSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
-                    entities.append(EltakoIlluminationSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
-                    entities.append(EltakoBatteryVoltageSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
+                    entities.append(
+                        EltakoTemperatureSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
+                    entities.append(
+                        EltakoIlluminationSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
+                    entities.append(
+                        EltakoBatteryVoltageSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
                     # _pir_status => as binary sensor
 
                 elif dev_conf.eep in [A5_06_01]:
-                    entities.append(EltakoIlluminationSensor(platform, gateway, dev_conf.id, dev_name, dev_conf.eep))
-                    #TODO: add twilight
-                    #TODO: add daylight
+                    entities.append(
+                        EltakoIlluminationSensor(
+                            platform, gateway, dev_conf.id, dev_name, dev_conf.eep
+                        )
+                    )
+                    # TODO: add twilight
+                    # TODO: add daylight
                     # both are currently combined in illumination
 
             except Exception as e:
@@ -388,18 +571,48 @@ async def async_setup_entry(
             try:
                 dev_conf = DeviceConf(entity_config)
                 if dev_conf.eep in [F6_01_01, F6_02_01, F6_02_02]:
+
                     def convert_event(event):
                         # if hasattr(event, 'data') and isinstance(event.data, dict) and 'pressed_buttons' in event.data:
-                        return config_helpers.button_abbreviation_to_str(event.data['pressed_buttons'])
+                        return config_helpers.button_abbreviation_to_str(
+                            event.data["pressed_buttons"]
+                        )
 
-                    event_id = config_helpers.get_bus_event_type(gateway.dev_id, EVENT_BUTTON_PRESSED, dev_conf.id)
+                    event_id = config_helpers.get_bus_event_type(
+                        gateway.dev_id, EVENT_BUTTON_PRESSED, dev_conf.id
+                    )
                     if dev_conf.eep in [F6_02_01, F6_02_02]:
-                        entities.append(EventListenerInfoField(platform, gateway, dev_conf.id, dev_conf.name, dev_conf.eep, event_id, "Pushed Buttons", convert_event, "mdi:gesture-tap-button"))
+                        entities.append(
+                            EventListenerInfoField(
+                                platform,
+                                gateway,
+                                dev_conf.id,
+                                dev_conf.name,
+                                dev_conf.eep,
+                                event_id,
+                                "Pushed Buttons",
+                                convert_event,
+                                "mdi:gesture-tap-button",
+                            )
+                        )
 
-                    entities.append(StaticInfoField(platform, gateway, dev_conf.id, dev_conf.name, dev_conf.eep, "Event Id", event_id, "mdi:form-textbox"))
-            
+                    entities.append(
+                        StaticInfoField(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_conf.name,
+                            dev_conf.eep,
+                            "Event Id",
+                            event_id,
+                            "mdi:form-textbox",
+                        )
+                    )
+
             except Exception as e:
-                LOGGER.warning("[%s] Could not load configuration", Platform.BINARY_SENSOR)
+                LOGGER.warning(
+                    "[%s] Could not load configuration", Platform.BINARY_SENSOR
+                )
                 LOGGER.critical(e, exc_info=True)
 
     # add id field for every device
@@ -408,20 +621,58 @@ async def async_setup_entry(
             for entity_config in config[pl]:
                 try:
                     dev_conf = DeviceConf(entity_config)
-                    entities.append(StaticInfoField(platform, gateway, dev_conf.id, dev_conf.name, dev_conf.eep, "Id", b2s(dev_conf.id[0]), "mdi:identifier"))
-                
+                    entities.append(
+                        StaticInfoField(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_conf.name,
+                            dev_conf.eep,
+                            "Id",
+                            b2s(dev_conf.id[0]),
+                            "mdi:identifier",
+                        )
+                    )
+
                 except Exception as e:
-                    LOGGER.warning("[%s] Could not load configuration", Platform.BINARY_SENSOR)
+                    LOGGER.warning(
+                        "[%s] Could not load configuration", Platform.BINARY_SENSOR
+                    )
                     LOGGER.critical(e, exc_info=True)
 
-
     # add gateway information
-    entities.append(GatewayInfoField(platform, gateway, "Id", str(gateway.dev_id), "mdi:identifier"))
-    entities.append(GatewayInfoField(platform, gateway, "Base Id", b2s(gateway.base_id[0]), "mdi:identifier"))
-    entities.append(GatewayInfoField(platform, gateway, "Serial Path", gateway.serial_path, "mdi:usb"))
-    entities.append(GatewayInfoField(platform, gateway, "USB Protocol", gateway.native_protocol, "mdi:usb"))
-    entities.append(GatewayInfoField(platform, gateway, "Message Delay", gateway.message_delay, "mdi:av-timer"))
-    entities.append(GatewayInfoField(platform, gateway, "Auto Connect Enabled", gateway.is_auto_reconnect_enabled, "mdi:connection"))
+    entities.append(
+        GatewayInfoField(platform, gateway, "Id", str(gateway.dev_id), "mdi:identifier")
+    )
+    entities.append(
+        GatewayInfoField(
+            platform, gateway, "Base Id", b2s(gateway.base_id[0]), "mdi:identifier"
+        )
+    )
+    entities.append(
+        GatewayInfoField(
+            platform, gateway, "Serial Path", gateway.serial_path, "mdi:usb"
+        )
+    )
+    entities.append(
+        GatewayInfoField(
+            platform, gateway, "USB Protocol", gateway.native_protocol, "mdi:usb"
+        )
+    )
+    entities.append(
+        GatewayInfoField(
+            platform, gateway, "Message Delay", gateway.message_delay, "mdi:av-timer"
+        )
+    )
+    entities.append(
+        GatewayInfoField(
+            platform,
+            gateway,
+            "Auto Connect Enabled",
+            gateway.is_auto_reconnect_enabled,
+            "mdi:connection",
+        )
+    )
     entities.append(GatewayLastReceivedMessage(platform, gateway))
     entities.append(GatewayReceivedMessagesInActiveSession(platform, gateway))
 
@@ -433,70 +684,108 @@ async def async_setup_entry(
 class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
     """Representation of an  Eltako sensor device such as a power meter."""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, 
-                 dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription,
     ) -> None:
         """Initialize the Eltako sensor device."""
         self.entity_description = description
         self._attr_state_class = description.state_class
-        
+
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep)
         self._attr_native_value = None
-        
+
     @property
     def name(self):
         """Return the default name for the sensor."""
         return self.entity_description.name
 
-    def load_value_initially(self, latest_state:State):
-        LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id}] eneity unique_id: {self.unique_id}")
-        LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}")
-        LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}")
+    def load_value_initially(self, latest_state: State):
+        LOGGER.debug(
+            f"[{self._attr_ha_platform} {self.dev_id}] eneity unique_id: {self.unique_id}"
+        )
+        LOGGER.debug(
+            f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}"
+        )
+        LOGGER.debug(
+            f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}"
+        )
         try:
-            if 'unknown' == latest_state.state:
+            if "unknown" == latest_state.state:
                 self._attr_is_on = None
             else:
-                if latest_state.attributes.get('state_class', None) == 'measurement':
-                    if latest_state.state.count('.') + latest_state.state.count(',') == 1:
+                if latest_state.attributes.get("state_class", None) == "measurement":
+                    if (
+                        latest_state.state.count(".") + latest_state.state.count(",")
+                        == 1
+                    ):
                         self._attr_native_value = float(latest_state.state)
-                    elif latest_state.state.count('.') == 0 and latest_state.state.count(',') == 0:
+                    elif (
+                        latest_state.state.count(".") == 0
+                        and latest_state.state.count(",") == 0
+                    ):
                         self._attr_native_value = int(latest_state.state)
                     else:
                         self._attr_native_value = None
 
-                elif latest_state.attributes.get('state_class', None) == 'total_increasing':
+                elif (
+                    latest_state.attributes.get("state_class", None)
+                    == "total_increasing"
+                ):
                     self._attr_native_value = int(latest_state.state)
 
-                elif latest_state.attributes.get('device_class', None) == 'device_class':
+                elif (
+                    latest_state.attributes.get("device_class", None) == "device_class"
+                ):
                     # e.g.: 2024-02-12T23:32:44+00:00
-                    self._attr_native_value = datetime.strptime(latest_state.state, '%Y-%m-%dT%H:%M:%S%z:%f')
-            
+                    self._attr_native_value = datetime.strptime(
+                        latest_state.state, "%Y-%m-%dT%H:%M:%S%z:%f"
+                    )
+
         except Exception as e:
-            if hasattr(self, '_attr_is_on'):
+            if hasattr(self, "_attr_is_on"):
                 self._attr_is_on = None
-            elif hasattr(self, '_attr_native_value'):
+            elif hasattr(self, "_attr_native_value"):
                 self._attr_native_value = None
             raise e
-        
+
         self.schedule_update_ha_state()
 
-        LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id} ({type(self).__name__})] value initially loaded: [native_value: {self.native_value}, state: {self.state}]")        
+        LOGGER.debug(
+            f"[{self._attr_ha_platform} {self.dev_id} ({type(self).__name__})] value initially loaded: [native_value: {self.native_value}, state: {self.state}]"
+        )
+
 
 class EltakoPirSensor(EltakoSensor):
     """Occupancy Sensor"""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name:str, dev_eep:EEP, description: EltakoSensorEntityDescription=SENSOR_DESC_PIR) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription = SENSOR_DESC_PIR,
+    ) -> None:
         """Initialize the Eltako meter sensor device."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep, description)
 
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor."""
         try:
-            decoded:A5_07_01 = self.dev_eep.decode_message(msg)
+            decoded: A5_07_01 = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Motion Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Motion Sensor %s] Could not decode message: %s", self.dev_id, str(e)
+            )
             return
-        
+
         self._attr_native_value = decoded.pir_status
 
         self.schedule_update_ha_state()
@@ -505,18 +794,28 @@ class EltakoPirSensor(EltakoSensor):
 class EltakoVoltageSensor(EltakoSensor):
     """Voltage Sensor"""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name:str, dev_eep:EEP, description: EltakoSensorEntityDescription=SENSOR_DESC_VOLTAGE) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription = SENSOR_DESC_VOLTAGE,
+    ) -> None:
         """Initialize the Eltako meter sensor device."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep, description)
 
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor."""
         try:
-            decoded:A5_07_01 = self.dev_eep.decode_message(msg)
+            decoded: A5_07_01 = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Voltage Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Voltage Sensor %s] Could not decode message: %s", self.dev_id, str(e)
+            )
             return
-        
+
         self._attr_native_value = decoded.support_voltage
 
         self.schedule_update_ha_state()
@@ -530,7 +829,19 @@ class EltakoMeterSensor(EltakoSensor):
     - A5-12-02 (Automated Meter Reading, Gas)
     - A5-12-03 (Automated Meter Reading, Water)
     """
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name:str, dev_eep:EEP, description: EltakoSensorEntityDescription, *, tariff, tariff_in_name:bool=True) -> None:
+
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription,
+        *,
+        tariff,
+        tariff_in_name: bool = True,
+    ) -> None:
         """Initialize the Eltako meter sensor device."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep, description)
         self._tariff = tariff
@@ -552,30 +863,46 @@ class EltakoMeterSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Meter Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Meter Sensor %s] Could not decode message: %s", self.dev_id, str(e)
+            )
             return
-        
+
         if decoded.learn_button != 1:
             return
-        
+
         tariff = decoded.measurement_channel
         cumulative = not decoded.data_type
         value = decoded.meter_reading
-        divisor = 10 ** decoded.divisor
+        divisor = 10**decoded.divisor
         calculatedValue = value / divisor
-        
-        if cumulative and self._tariff == tariff and (
-            self.entity_description.key == SENSOR_TYPE_ELECTRICITY_CUMULATIVE or
-            self.entity_description.key == SENSOR_TYPE_GAS_CUMULATIVE or
-            self.entity_description.key == SENSOR_TYPE_WATER_CUMULATIVE):
+
+        if (
+            cumulative
+            and self._tariff == tariff
+            and (
+                self.entity_description.key == SENSOR_TYPE_ELECTRICITY_CUMULATIVE
+                or self.entity_description.key == SENSOR_TYPE_GAS_CUMULATIVE
+                or self.entity_description.key == SENSOR_TYPE_WATER_CUMULATIVE
+            )
+        ):
             self._attr_native_value = round(calculatedValue, 2)
             self.schedule_update_ha_state()
-        elif (not cumulative) and msg.data[3] != 0x8F and self.entity_description.key == SENSOR_TYPE_ELECTRICITY_CURRENT: # 0x8F means that, it's sending the serial number of the meter
+        elif (
+            (not cumulative)
+            and msg.data[3] != 0x8F
+            and self.entity_description.key == SENSOR_TYPE_ELECTRICITY_CURRENT
+        ):  # 0x8F means that, it's sending the serial number of the meter
             self._attr_native_value = round(calculatedValue, 2)
             self.schedule_update_ha_state()
-        elif (not cumulative) and self._tariff == tariff and (
-            self.entity_description.key == SENSOR_TYPE_GAS_CURRENT or
-            self.entity_description.key == SENSOR_TYPE_WATER_CURRENT):
+        elif (
+            (not cumulative)
+            and self._tariff == tariff
+            and (
+                self.entity_description.key == SENSOR_TYPE_GAS_CURRENT
+                or self.entity_description.key == SENSOR_TYPE_WATER_CURRENT
+            )
+        ):
             # l/s -> m3/h
             self._attr_native_value = round(calculatedValue * 3.6, 2)
             self.schedule_update_ha_state()
@@ -588,18 +915,30 @@ class EltakoWindowHandle(EltakoSensor):
     - F6-10-00 (Mechanical handle / Hoppe AG)
     """
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription,
+    ) -> None:
         """Initialize the Eltako window handle sensor device."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep, description)
 
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor."""
         try:
-            decoded:F6_10_00 = self.dev_eep.decode_message(msg)
+            decoded: F6_10_00 = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Window Handle Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Window Handle Sensor %s] Could not decode message: %s",
+                self.dev_id,
+                str(e),
+            )
             return
-        
+
         if decoded.handle_position == WindowHandlePosition.CLOSED:
             self._attr_native_value = STATE_CLOSED
         elif decoded.handle_position == WindowHandlePosition.OPEN:
@@ -614,12 +953,20 @@ class EltakoWindowHandle(EltakoSensor):
 
 class EltakoWeatherStation(EltakoSensor):
     """Representation of an Eltako weather station.
-    
+
     EEPs (EnOcean Equipment Profiles):
     - A5-13-01 (Weather station)
     """
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription,
+    ) -> None:
         """Initialize the Eltako weather station device."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep, description)
 
@@ -628,49 +975,60 @@ class EltakoWeatherStation(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Weather Station %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Weather Station %s] Could not decode message: %s", self.dev_id, str(e)
+            )
             return
-        
+
         if decoded.learn_button != 1:
             return
-        
-        if msg.data == bytes((0, 0, 0xFF, 0x1A)): # I don't really know why this is filtered out
+
+        if msg.data == bytes(
+            (0, 0, 0xFF, 0x1A)
+        ):  # I don't really know why this is filtered out
             return
 
         if self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_DAWN:
             if decoded.identifier != 0x01:
                 return
-            
+
             self._attr_native_value = decoded.dawn_sensor
         elif self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_TEMPERATURE:
             if decoded.identifier != 0x01:
                 return
-            
+
             self._attr_native_value = decoded.temperature
         elif self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_WIND_SPEED:
             if decoded.identifier != 0x01:
                 return
-            
+
             self._attr_native_value = decoded.wind_speed
         elif self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_RAIN:
             if decoded.identifier != 0x01:
                 return
-            
+
             self._attr_native_value = decoded.rain_indication
-        elif self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_WEST:
+        elif (
+            self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_WEST
+        ):
             if decoded.identifier != 0x02:
                 return
-            
+
             self._attr_native_value = decoded.sun_west * 1000.0
-        elif self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_CENTRAL:
+        elif (
+            self.entity_description.key
+            == SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_CENTRAL
+        ):
             if decoded.identifier != 0x02:
                 return
-            
+
             self._attr_native_value = decoded.sun_south * 1000.0
-        elif self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_EAST:
+        elif (
+            self.entity_description.key == SENSOR_TYPE_WEATHER_STATION_ILLUMINANCE_EAST
+        ):
             if decoded.identifier != 0x02:
                 return
-            
+
             self._attr_native_value = decoded.sun_east * 1000.0
 
         self.schedule_update_ha_state()
@@ -678,12 +1036,20 @@ class EltakoWeatherStation(EltakoSensor):
 
 class EltakoTemperatureSensor(EltakoSensor):
     """Representation of an Eltako temperature sensor.
-    
+
     EEPs (EnOcean Equipment Profiles):
     - A5-04-02 (Temperature and Humidity)
     """
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription=SENSOR_DESC_TEMPERATURE) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription = SENSOR_DESC_TEMPERATURE,
+    ) -> None:
         """Initialize the Eltako temperature sensor."""
         _dev_name = dev_name
         if _dev_name == "":
@@ -695,17 +1061,30 @@ class EltakoTemperatureSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Temperature Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Temperature Sensor %s] Could not decode message: %s",
+                self.dev_id,
+                str(e),
+            )
             return
-        
+
         self._attr_native_value = decoded.current_temperature
 
         self.schedule_update_ha_state()
 
+
 class EltakoIlluminationSensor(EltakoSensor):
     """Brightness sensor"""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription=SENSOR_DESC_ILLUMINATION) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription = SENSOR_DESC_ILLUMINATION,
+    ) -> None:
         """Initialize the Eltako temperature sensor."""
         _dev_name = dev_name
         if _dev_name == "":
@@ -717,9 +1096,13 @@ class EltakoIlluminationSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Illumination Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Illumination Sensor %s] Could not decode message: %s",
+                self.dev_id,
+                str(e),
+            )
             return
-        
+
         self._attr_native_value = decoded.illumination
 
         self.schedule_update_ha_state()
@@ -728,7 +1111,15 @@ class EltakoIlluminationSensor(EltakoSensor):
 class EltakoBatteryVoltageSensor(EltakoSensor):
     """Representation of an Eltako battery sensor."""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription=SENSOR_DESC_BATTERY_VOLTAGE) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription = SENSOR_DESC_BATTERY_VOLTAGE,
+    ) -> None:
         """Initialize the Eltako temperature sensor."""
         _dev_name = dev_name
         if _dev_name == "":
@@ -740,9 +1131,13 @@ class EltakoBatteryVoltageSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Battery Voltage Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Battery Voltage Sensor %s] Could not decode message: %s",
+                self.dev_id,
+                str(e),
+            )
             return
-        
+
         self._attr_native_value = decoded.supply_voltage
 
         self.schedule_update_ha_state()
@@ -750,26 +1145,38 @@ class EltakoBatteryVoltageSensor(EltakoSensor):
 
 class EltakoTargetTemperatureSensor(EltakoSensor):
     """Representation of an Eltako target temperature sensor.
-    
+
     EEPs (EnOcean Equipment Profiles):
     - A5-10-06, A5-10-12
     """
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, description: EltakoSensorEntityDescription=SENSOR_DESC_TARGET_TEMPERATURE) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription = SENSOR_DESC_TARGET_TEMPERATURE,
+    ) -> None:
         """Initialize the Eltako temperature sensor."""
         _dev_name = dev_name
         if _dev_name == "":
             _dev_name = DEFAULT_DEVICE_NAME_THERMOMETER
         super().__init__(platform, gateway, dev_id, _dev_name, dev_eep, description)
-    
+
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor."""
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Target Temperature Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Target Temperature Sensor %s] Could not decode message: %s",
+                self.dev_id,
+                str(e),
+            )
             return
-        
+
         self._attr_native_value = round(2 * decoded.target_temperature, 0) / 2
 
         self.schedule_update_ha_state()
@@ -777,38 +1184,58 @@ class EltakoTargetTemperatureSensor(EltakoSensor):
 
 class EltakoHumiditySensor(EltakoSensor):
     """Representation of an Eltako humidity sensor.
-    
+
     EEPs (EnOcean Equipment Profiles):
     - A5-04-02 (Temperature and Humidity)
     """
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name:str, dev_eep: EEP, description: EltakoSensorEntityDescription=SENSOR_DESC_HUMIDITY) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        description: EltakoSensorEntityDescription = SENSOR_DESC_HUMIDITY,
+    ) -> None:
         """Initialize the Eltako humidity sensor."""
         _dev_name = dev_name
         if _dev_name == "":
             _dev_name = DEFAULT_DEVICE_NAME_HYGROSTAT
         super().__init__(platform, gateway, dev_id, _dev_name, dev_eep, description)
-    
+
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor."""
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Humidity Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Humidity Sensor %s] Could not decode message: %s", self.dev_id, str(e)
+            )
             return
-        
+
         self._attr_native_value = decoded.humidity
 
         self.schedule_update_ha_state()
 
+
 class EltakoAirQualitySensor(EltakoSensor):
     """Representation of an Eltako air quality sensor.
-    
+
     EEPs (EnOcean Equipment Profiles):
     - A5-09-0C
     """
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, voc_type:VOC_SubstancesType, language:LANGUAGE_ABBREVIATION) -> None:
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        voc_type: VOC_SubstancesType,
+        language: LANGUAGE_ABBREVIATION,
+    ) -> None:
         """Initialize the Eltako air quality sensor."""
         _dev_name = dev_name
         if _dev_name == "":
@@ -819,11 +1246,11 @@ class EltakoAirQualitySensor(EltakoSensor):
             self.voc_type_name = voc_type.name_de
 
         description = EltakoSensorEntityDescription(
-            key = "air_quality_sensor_"+self.voc_type_name,
-            device_class = SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
+            key="air_quality_sensor_" + self.voc_type_name,
+            device_class=SensorDeviceClass.VOLATILE_ORGANIC_COMPOUNDS,
             # device_class=SensorDeviceClass.AQI,
-            name = self.voc_type_name,
-            native_unit_of_measurement = voc_type.unit,
+            name=self.voc_type_name,
+            native_unit_of_measurement=voc_type.unit,
             icon="mdi:air-filter",
             state_class=SensorStateClass.MEASUREMENT,
         )
@@ -832,38 +1259,46 @@ class EltakoAirQualitySensor(EltakoSensor):
         self.voc_type = voc_type
         # self._attr_suggested_unit_of_measurement = voc_type.unit
 
-        LOGGER.debug(f"entity_description: {self.entity_description}, voc_type: {voc_type}")
-    
-    
+        LOGGER.debug(
+            f"entity_description: {self.entity_description}, voc_type: {voc_type}"
+        )
+
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor."""
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("[Air Quality Sensor %s] Could not decode message: %s", self.dev_id, str(e))
+            LOGGER.warning(
+                "[Air Quality Sensor %s] Could not decode message: %s",
+                self.dev_id,
+                str(e),
+            )
             return
-        
+
         if decoded.voc_type.index == self.voc_type.index:
             # LOGGER.debug(f"[EltakoAirQualitySensor] received message - concentration: {decoded.concentration}, voc_type: {decoded.voc_type}, voc_unit: {decoded.voc_unit}")
             self._attr_native_value = decoded.concentration
 
         self.schedule_update_ha_state()
 
+
 class GatewayLastReceivedMessage(EltakoSensor):
     """Protocols last time when message received"""
 
     def __init__(self, platform: str, gateway: EnOceanGateway):
-        super().__init__(platform, gateway,
-                         dev_id=gateway.base_id, 
-                         dev_name="Last Message Received", 
-                         dev_eep=None,
-                         description=EltakoSensorEntityDescription(
-                            key="Last Message Received",
-                            name="Last Message Received",
-                            icon="mdi:message-check-outline",
-                            device_class=SensorDeviceClass.TIMESTAMP,
-                            has_entity_name= True,
-                        )
+        super().__init__(
+            platform,
+            gateway,
+            dev_id=gateway.base_id,
+            dev_name="Last Message Received",
+            dev_eep=None,
+            description=EltakoSensorEntityDescription(
+                key="Last Message Received",
+                name="Last Message Received",
+                icon="mdi:message-check-outline",
+                device_class=SensorDeviceClass.TIMESTAMP,
+                has_entity_name=True,
+            ),
         )
         self._attr_name = "Last Message Received"
         self.gateway.set_last_message_received_handler(self.async_value_changed)
@@ -873,18 +1308,18 @@ class GatewayLastReceivedMessage(EltakoSensor):
         """Return the device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, self.gateway.serial_path)},
-            name= self.gateway.dev_name,
+            name=self.gateway.dev_name,
             manufacturer=MANUFACTURER,
             model=self.gateway.model,
-            via_device=(DOMAIN, self.gateway.serial_path)
+            via_device=(DOMAIN, self.gateway.serial_path),
         )
-    
+
     async def async_value_changed(self, value: datetime) -> None:
         try:
             self.value_changed(value)
         except AttributeError as e:
             # Home Assistant not ready yet
-            pass  
+            pass
 
     def value_changed(self, value: datetime) -> None:
         """Update the current value."""
@@ -894,26 +1329,29 @@ class GatewayLastReceivedMessage(EltakoSensor):
             self.native_value = value
             self.schedule_update_ha_state()
 
+
 class GatewayReceivedMessagesInActiveSession(EltakoSensor):
     """Protocols amount of messages per session"""
 
     def __init__(self, platform: str, gateway: EnOceanGateway):
-        super().__init__(platform, gateway,
-                         dev_id=gateway.base_id, 
-                         dev_name="Received Messages per Session", 
-                         dev_eep=None,
-                         description=EltakoSensorEntityDescription(
-                            key="Received Messages per Session",
-                            name="Received Messages per Session",
-                            state_class=SensorStateClass.TOTAL_INCREASING,
-                            # device_class=SensorDeviceClass.VOLUME,
-                            # native_unit_of_measurement="Messages", # => raises error message
-                            unit_of_measurement="Messages",
-                            # suggested_unit_of_measurement="Messages", # => raises error message, final solution TBD
-                            icon="mdi:chart-line",
-                        )
+        super().__init__(
+            platform,
+            gateway,
+            dev_id=gateway.base_id,
+            dev_name="Received Messages per Session",
+            dev_eep=None,
+            description=EltakoSensorEntityDescription(
+                key="Received Messages per Session",
+                name="Received Messages per Session",
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                # device_class=SensorDeviceClass.VOLUME,
+                # native_unit_of_measurement="Messages", # => raises error message
+                unit_of_measurement="Messages",
+                # suggested_unit_of_measurement="Messages", # => raises error message, final solution TBD
+                icon="mdi:chart-line",
+            ),
         )
-        self._attr_name="Received Messages per Session"
+        self._attr_name = "Received Messages per Session"
         self.gateway.set_received_message_count_handler(self.async_value_changed)
 
     @property
@@ -921,18 +1359,18 @@ class GatewayReceivedMessagesInActiveSession(EltakoSensor):
         """Return the device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, self.gateway.serial_path)},
-            name= self.gateway.dev_name,
+            name=self.gateway.dev_name,
             manufacturer=MANUFACTURER,
             model=self.gateway.model,
-            via_device=(DOMAIN, self.gateway.serial_path)
+            via_device=(DOMAIN, self.gateway.serial_path),
         )
-    
+
     async def async_value_changed(self, value: int) -> None:
         try:
             self.value_changed(value)
         except AttributeError as e:
             # Home Assistant not ready yet
-            pass  
+            pass
 
     def value_changed(self, value: int) -> None:
         """Update the current value."""
@@ -945,17 +1383,29 @@ class GatewayReceivedMessagesInActiveSession(EltakoSensor):
 class StaticInfoField(EltakoSensor):
     """Key value fields for gateway information"""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, key:str, value:str, icon:str=None):
-        super().__init__(platform, gateway,
-                         dev_id=dev_id, 
-                         dev_name=dev_name, 
-                         dev_eep=dev_eep,
-                         description=EltakoSensorEntityDescription(
-                            key=key,
-                            name=key,
-                            icon=icon,
-                            has_entity_name= True,
-                        )
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        key: str,
+        value: str,
+        icon: str = None,
+    ):
+        super().__init__(
+            platform,
+            gateway,
+            dev_id=dev_id,
+            dev_name=dev_name,
+            dev_eep=dev_eep,
+            description=EltakoSensorEntityDescription(
+                key=key,
+                name=key,
+                icon=icon,
+                has_entity_name=True,
+            ),
         )
         self._attr_name = key
         self._attr_native_value = value
@@ -963,58 +1413,81 @@ class StaticInfoField(EltakoSensor):
     def value_changed(self, value) -> None:
         pass
 
+
 class GatewayInfoField(StaticInfoField):
     """Key value fields for gateway information"""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, key:str, value:str, icon:str=None):
-        super().__init__(platform, 
-                         gateway,
-                         dev_id=gateway.base_id, 
-                         dev_name=key, 
-                         dev_eep=None,
-                         key=key,
-                         value=value,
-                         icon=icon
-                         )
-        
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        key: str,
+        value: str,
+        icon: str = None,
+    ):
+        super().__init__(
+            platform,
+            gateway,
+            dev_id=gateway.base_id,
+            dev_name=key,
+            dev_eep=None,
+            key=key,
+            value=value,
+            icon=icon,
+        )
+
     @property
     def device_info(self) -> DeviceInfo:
         """Return the device info."""
         return DeviceInfo(
             identifiers={(DOMAIN, self.gateway.serial_path)},
-            name= self.gateway.dev_name,
+            name=self.gateway.dev_name,
             manufacturer=MANUFACTURER,
             model=self.gateway.model,
-            via_device=(DOMAIN, self.gateway.serial_path)
+            via_device=(DOMAIN, self.gateway.serial_path),
         )
-        
+
+
 class EventListenerInfoField(EltakoSensor):
     """Key value fields for gateway information"""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway, dev_id: AddressExpression, dev_name: str, dev_eep: EEP, event_id: str, key:str, convert_event_function, icon:str=None):
-        super().__init__(platform, gateway,
-                         dev_id=dev_id, 
-                         dev_name=dev_name, 
-                         dev_eep=dev_eep,
-                         description=EltakoSensorEntityDescription(
-                            key=key,
-                            name=key,
-                            icon=icon,
-                            has_entity_name= True,
-                        )
+    def __init__(
+        self,
+        platform: str,
+        gateway: EnOceanGateway,
+        dev_id: AddressExpression,
+        dev_name: str,
+        dev_eep: EEP,
+        event_id: str,
+        key: str,
+        convert_event_function,
+        icon: str = None,
+    ):
+        super().__init__(
+            platform,
+            gateway,
+            dev_id=dev_id,
+            dev_name=dev_name,
+            dev_eep=dev_eep,
+            description=EltakoSensorEntityDescription(
+                key=key,
+                name=key,
+                icon=icon,
+                has_entity_name=True,
+            ),
         )
         self.convert_event_function = convert_event_function
         self._attr_name = key
-        self._attr_native_value = ''
+        self._attr_native_value = ""
         self.listen_to_addresses.clear()
 
-        LOGGER.debug(f"[{platform}] [{EventListenerInfoField.__name__}] [{b2s(dev_id[0])}] [{key}] Register event: {event_id}")
+        LOGGER.debug(
+            f"[{platform}] [{EventListenerInfoField.__name__}] [{b2s(dev_id[0])}] [{key}] Register event: {event_id}"
+        )
         self.hass.bus.async_listen(event_id, self.value_changed)
 
-    
     def value_changed(self, event) -> None:
         LOGGER.debug(f"Received event: {event}")
         self.native_value = self.convert_event_function(event)
 
         self.schedule_update_ha_state()
-            
