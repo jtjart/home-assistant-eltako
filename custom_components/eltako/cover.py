@@ -232,7 +232,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.COVER,
                 str(self.dev_id),
@@ -262,7 +262,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.COVER,
                 str(self.dev_id),
@@ -331,7 +331,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.COVER,
                 str(self.dev_id),

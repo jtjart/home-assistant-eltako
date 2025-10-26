@@ -170,7 +170,7 @@ class EltakoDimmableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -209,7 +209,7 @@ class EltakoDimmableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -265,7 +265,7 @@ class EltakoDimmableLight(AbstractLightEntity):
             self.schedule_update_ha_state()
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Device EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -320,7 +320,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -358,7 +358,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -388,7 +388,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
             self.schedule_update_ha_state()
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] Device EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),

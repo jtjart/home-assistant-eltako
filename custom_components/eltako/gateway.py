@@ -208,7 +208,7 @@ class EnOceanGateway:
     ) -> bool:
         result = config_helpers.compare_enocean_ids(self.base_id[0], sender_id[0])
         if not result:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 f"{device_name} ({sender_id}): Maybe have wrong sender id configured!"
             )
         return result
@@ -230,7 +230,7 @@ class EnOceanGateway:
     ) -> bool:
         result = 0xFF == dev_id[0][0]
         if not result:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 f"{device_name} ({dev_id}): Maybe have wrong device id configured!"
             )
         return result
@@ -242,7 +242,7 @@ class EnOceanGateway:
             b"\x00\x00\x00\x00", dev_id[0], len=2
         )
         if not result:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 f"{device_name} ({dev_id}): Maybe have wrong device id configured!"
             )
         return result
@@ -376,7 +376,7 @@ class EnOceanGateway:
                 # put message on serial bus
                 self.hass.create_task(self._bus.send(msg))
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[Gateway] [Id: %d] Serial port %s is not available!!! message (%s) was not sent.",
                 self.dev_id,
                 self.serial_path,

@@ -135,7 +135,7 @@ class EltakoEntity(Entity):
 
     def load_value_initially(self, latest_state: State):
         """This function is implemented in the concrete devices classes"""
-        _LOGGER.warn(
+        _LOGGER.warning(
             f"[{self._attr_ha_platform} {self.dev_id}] DOES NOT HAVE AN IMPLEMENTATION FOR: load_value_initially()"
         )
         _LOGGER.debug(

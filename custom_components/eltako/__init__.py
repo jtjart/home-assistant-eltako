@@ -110,7 +110,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
     # Check domain
     if config_entry.domain != DOMAIN:
-        _LOGGER.warn(
+        _LOGGER.warning(
             f"Ooops, received configuration entry of wrong domain '%s' (expected: '')!",
             config_entry.domain,
             DOMAIN,
@@ -137,13 +137,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     # Initialise the gateway
     # get base_id from user input
     if CONF_GATEWAY_DESCRIPTION not in config_entry.data.keys():
-        _LOGGER.warn(
+        _LOGGER.warning(
             "Ooops, device information for gateway is not available. Try to delete and recreate the gateway."
         )
         return
     gateway_description = config_entry.data[CONF_GATEWAY_DESCRIPTION]  # from user input
     if not ("(" in gateway_description and ")" in gateway_description):
-        _LOGGER.warn(
+        _LOGGER.warning(
             "Ooops, no base id of gateway available. Try to delete and recreate the gateway."
         )
         return
@@ -154,14 +154,16 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         gateway_id, hass, CONFIG_SCHEMA
     )
     if not gateway_config:
-        _LOGGER.warn(
+        _LOGGER.warning(
             f"Ooops, no gateway configuration found in '/homeassistant/configuration.yaml'."
         )
         return
 
     # get serial path info
     if CONF_SERIAL_PATH not in config_entry.data.keys():
-        _LOGGER.warn("Ooops, no information about serial path available for gateway.")
+        _LOGGER.warning(
+            "Ooops, no information about serial path available for gateway."
+        )
         return
     gateway_serial_path = config_entry.data[CONF_SERIAL_PATH]
 

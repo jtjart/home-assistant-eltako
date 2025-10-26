@@ -482,7 +482,7 @@ class EltakoBinarySensor(AbstractBinarySensor):
                 self._attr_is_on = not self._attr_is_on
 
         else:
-            _LOGGER.warn(
+            _LOGGER.warning(
                 "[%s %s] EEP %s not found for data processing.",
                 Platform.BINARY_SENSOR,
                 str(self.dev_id),
