@@ -4,20 +4,33 @@ from __future__ import annotations
 
 from typing import Any
 
-from eltakobus.eep import *
+from eltakobus.eep import (
+    A5_38_08,
+    EEP,
+    F6_02_01,
+    F6_02_02,
+    M5_38_08,
+    CentralCommandDimming,
+    CentralCommandSwitching,
+)
 from eltakobus.util import AddressExpression
 
 from homeassistant import config_entries
 from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
 from .config_helpers import DeviceConf
-from .const import *
-from .device import *
+from .const import CONF_FAST_STATUS_CHANGE, CONF_SENDER, LOGGER
+from .device import (
+    EltakoEntity,
+    log_entities_to_be_added,
+    validate_actuators_dev_and_sender_id,
+)
 from .gateway import EnOceanGateway
 
 

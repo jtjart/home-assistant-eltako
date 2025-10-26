@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from eltakobus.eep import *
+from eltakobus.eep import EEP, G5_3F_7F, H5_3F_7F
 from eltakobus.util import AddressExpression
 
 from homeassistant import config_entries
@@ -23,20 +23,26 @@ from homeassistant.const import (
     STATE_OPENING,
     Platform,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
 from .config_helpers import DeviceConf
 from .const import (
+    CONF_FAST_STATUS_CHANGE,
     CONF_SENDER,
     CONF_TIME_CLOSES,
     CONF_TIME_OPENS,
     CONF_TIME_TILTS,
     LOGGER,
 )
-from .device import *
+from .device import (
+    EltakoEntity,
+    log_entities_to_be_added,
+    validate_actuators_dev_and_sender_id,
+)
 from .gateway import EnOceanGateway
 
 

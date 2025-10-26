@@ -6,7 +6,23 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.reload import async_integration_yaml_config
 from homeassistant.helpers.typing import ConfigType
 
-from .const import *
+from .const import (
+    CONF_BASE_ID,
+    CONF_DEVICE_TYPE,
+    CONF_EEP,
+    CONF_ENABLE_TEACH_IN_BUTTONS,
+    CONF_FAST_STATUS_CHANGE,
+    CONF_GATEWAY,
+    CONF_GATEWAY_ID,
+    CONF_GERNERAL_SETTINGS,
+    CONF_SERIAL_PATH,
+    CONF_SHOW_DEV_ID_IN_DEV_NAME,
+    DATA_ELTAKO,
+    DOMAIN,
+    ELTAKO_CONFIG,
+    GATEWAY_DEFAULT_NAME,
+    LOGGER,
+)
 
 # default settings from configuration
 DEFAULT_GENERAL_SETTINGS = {

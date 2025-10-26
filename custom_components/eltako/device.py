@@ -20,7 +20,13 @@ from homeassistant.helpers.entity_platform import DATA_ENTITY_PLATFORM
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import config_helpers
-from .const import *
+from .const import (
+    DOMAIN,
+    LOGGER,
+    MANUFACTURER,
+    SIGNAL_RECEIVE_MESSAGE,
+    SIGNAL_SEND_MESSAGE,
+)
 from .gateway import EnOceanGateway
 
 

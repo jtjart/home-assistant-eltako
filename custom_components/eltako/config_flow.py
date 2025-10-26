@@ -9,7 +9,18 @@ from homeassistant import config_entries
 from homeassistant.helpers import device_registry as dr
 
 from . import config_helpers, gateway
-from .const import *
+from .const import (
+    CONF_GATEWAY_ADDRESS,
+    CONF_GATEWAY_DESCRIPTION,
+    CONF_SERIAL_PATH,
+    DATA_ELTAKO,
+    DOMAIN,
+    ERROR_INVALID_GATEWAY_PATH,
+    ERROR_NO_GATEWAY_CONFIGURATION_AVAILABLE,
+    ERROR_NO_SERIAL_PATH_AVAILABLE,
+    LOGGER,
+    GatewayDeviceType,
+)
 from .schema import CONFIG_SCHEMA
 
 

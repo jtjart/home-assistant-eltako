@@ -4,7 +4,19 @@ from __future__ import annotations
 
 import json
 
-from eltakobus.eep import *
+from eltakobus.eep import (
+    A5_07_01,
+    A5_08_01,
+    A5_30_01,
+    A5_30_03,
+    D5_00_01,
+    EEP,
+    F6_01_01,
+    F6_02_01,
+    F6_02_02,
+    F6_10_00,
+)
+from eltakobus.message import ESP2Message
 from eltakobus.util import AddressExpression
 
 from homeassistant import config_entries
@@ -12,15 +24,23 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
 )
-from homeassistant.const import CONF_DEVICE_CLASS
-from homeassistant.core import HomeAssistant
+from homeassistant.const import CONF_DEVICE_CLASS, Platform
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity import DeviceInfo, EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
-from .const import *
-from .device import *
+from .const import (
+    CONF_INVERT_SIGNAL,
+    DOMAIN,
+    EVENT_BUTTON_PRESSED,
+    EVENT_CONTACT_CLOSED,
+    LOGGER,
+    MANUFACTURER,
+)
+from .device import EltakoEntity, log_entities_to_be_added
 from .gateway import EnOceanGateway
 from .schema import CONF_EEP_SUPPORTED_BINARY_SENSOR
 

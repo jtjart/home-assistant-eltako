@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import time
 
-from eltakobus.eep import *
+from eltakobus.eep import A5_10_06, EEP, RPSMessage
 from eltakobus.message import ESP2Message
 from eltakobus.util import AddressExpression
 
@@ -17,14 +17,29 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.const import CONF_TEMPERATURE_UNIT, Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
 from .config_helpers import DeviceConf
-from .const import *
-from .device import *
+from .const import (
+    CONF_COOLING_MODE,
+    CONF_MAX_TARGET_TEMPERATURE,
+    CONF_MIN_TARGET_TEMPERATURE,
+    CONF_ROOM_THERMOSTAT,
+    CONF_SENDER,
+    CONF_SENSOR,
+    CONF_SWITCH_BUTTON,
+    EVENT_BUTTON_PRESSED,
+    LOGGER,
+)
+from .device import (
+    EltakoEntity,
+    log_entities_to_be_added,
+    validate_actuators_dev_and_sender_id,
+)
 from .gateway import EnOceanGateway
 
 

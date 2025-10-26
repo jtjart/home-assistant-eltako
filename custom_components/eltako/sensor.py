@@ -5,7 +5,29 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from eltakobus.eep import *
+from eltakobus.eep import (
+    A5_04_01,
+    A5_04_02,
+    A5_04_03,
+    A5_06_01,
+    A5_07_01,
+    A5_08_01,
+    A5_09_0C,
+    A5_10_03,
+    A5_10_06,
+    A5_10_12,
+    A5_12_01,
+    A5_12_02,
+    A5_12_03,
+    A5_13_01,
+    EEP,
+    F6_01_01,
+    F6_02_01,
+    F6_02_02,
+    F6_10_00,
+    VOC_SubstancesType,
+    WindowHandlePosition,
+)
 from eltakobus.message import ESP2Message
 from eltakobus.util import AddressExpression, b2s
 
@@ -31,16 +53,29 @@ from homeassistant.const import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
-from .config_helpers import *
-from .const import *
-from .device import *
+from .config_helpers import DeviceConf
+from .const import (
+    CONF_METER_TARIFFS,
+    CONF_VOC_TYPE_INDEXES,
+    DOMAIN,
+    EVENT_BUTTON_PRESSED,
+    LANGUAGE_ABBREVIATION,
+    LOGGER,
+    MANUFACTURER,
+    PLATFORMS,
+)
+from .device import (
+    EltakoEntity,
+    log_entities_to_be_added,
+    validate_actuators_dev_and_sender_id,
+)
 from .gateway import EnOceanGateway
 
 DEFAULT_DEVICE_NAME_WINDOW_HANDLE = "Window handle"

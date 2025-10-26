@@ -1,13 +1,35 @@
 """Support for Eltako devices."""
 
+from eltakobus.util import AddressExpression
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers
-from .const import *
-from .gateway import *
+from .const import (
+    BAUD_RATE_DEVICE_TYPE_MAPPING,
+    CONF_BASE_ID,
+    CONF_DEVICE_TYPE,
+    CONF_ENABLE_TEACH_IN_BUTTONS,
+    CONF_GATEWAY_ADDRESS,
+    CONF_GATEWAY_AUTO_RECONNECT,
+    CONF_GATEWAY_DESCRIPTION,
+    CONF_GATEWAY_MESSAGE_DELAY,
+    CONF_GATEWAY_PORT,
+    CONF_SERIAL_PATH,
+    DATA_ELTAKO,
+    DATA_ENTITIES,
+    DOMAIN,
+    ELTAKO_CONFIG,
+    GATEWAY_DEFAULT_NAME,
+    LOGGER,
+    OLD_GATEWAY_DEFAULT_NAME,
+    PLATFORMS,
+    GatewayDeviceType,
+)
+from .gateway import EnOceanGateway
 from .schema import CONFIG_SCHEMA
 
 LOG_PREFIX = "Eltako Integration Setup"

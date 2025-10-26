@@ -19,7 +19,15 @@ from homeassistant.helpers.device_registry import DeviceRegistry
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, dispatcher_send
 
 from . import config_helpers
-from .const import *
+from .const import (
+    DOMAIN,
+    GATEWAY_DEFAULT_NAME,
+    LOGGER,
+    MANUFACTURER,
+    SIGNAL_RECEIVE_MESSAGE,
+    SIGNAL_SEND_MESSAGE,
+    GatewayDeviceType,
+)
 
 
 async def async_get_base_ids_of_registered_gateway(

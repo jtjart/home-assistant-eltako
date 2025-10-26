@@ -1,22 +1,21 @@
 import datetime
 
-from custom_components.eltako.__init__ import (
-    get_device_config_for_gateway,
-    get_gateway_from_hass,
-)
-
 from homeassistant import config_entries
 from homeassistant.components.datetime import DateTimeEntity
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity import DeviceInfo, EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
 
 from . import get_device_config_for_gateway, get_gateway_from_hass
-from .const import *
-from .device import *
+from .const import DOMAIN, LOGGER, MANUFACTURER
+from .device import (
+    EltakoEntity,
+    log_entities_to_be_added,
+    validate_actuators_dev_and_sender_id,
+)
 from .gateway import EnOceanGateway
 
 

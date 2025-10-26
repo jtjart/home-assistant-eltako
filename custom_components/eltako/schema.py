@@ -3,7 +3,34 @@
 from abc import ABC
 from typing import ClassVar
 
-from eltakobus.eep import *
+from eltakobus.eep import (
+    A5_04_01,
+    A5_04_02,
+    A5_04_03,
+    A5_06_01,
+    A5_07_01,
+    A5_08_01,
+    A5_09_0C,
+    A5_10_03,
+    A5_10_06,
+    A5_10_12,
+    A5_12_01,
+    A5_12_02,
+    A5_12_03,
+    A5_13_01,
+    A5_30_01,
+    A5_30_03,
+    A5_38_08,
+    D5_00_01,
+    F6_01_01,
+    F6_02_01,
+    F6_02_02,
+    F6_10_00,
+    G5_3F_7F,
+    H5_3F_7F,
+    M5_38_08,
+    VOC_SubstancesType,
+)
 import voluptuous as vol
 
 from homeassistant.components.binary_sensor import (
@@ -24,7 +51,37 @@ from homeassistant.const import (
 )
 import homeassistant.helpers.config_validation as cv
 
-from .const import *
+from .const import (
+    CONF_BASE_ID,
+    CONF_COOLING_MODE,
+    CONF_DEVICE_TYPE,
+    CONF_EEP,
+    CONF_FAST_STATUS_CHANGE,
+    CONF_GATEWAY,
+    CONF_GATEWAY_ADDRESS,
+    CONF_GATEWAY_AUTO_RECONNECT,
+    CONF_GATEWAY_ID,
+    CONF_GATEWAY_MESSAGE_DELAY,
+    CONF_GATEWAY_PORT,
+    CONF_GERNERAL_SETTINGS,
+    CONF_ID_REGEX,
+    CONF_INVERT_SIGNAL,
+    CONF_MAX_TARGET_TEMPERATURE,
+    CONF_METER_TARIFFS,
+    CONF_MIN_TARGET_TEMPERATURE,
+    CONF_ROOM_THERMOSTAT,
+    CONF_SENDER,
+    CONF_SENSOR,
+    CONF_SERIAL_PATH,
+    CONF_SHOW_DEV_ID_IN_DEV_NAME,
+    CONF_SWITCH_BUTTON,
+    CONF_TIME_CLOSES,
+    CONF_TIME_OPENS,
+    CONF_TIME_TILTS,
+    CONF_VOC_TYPE_INDEXES,
+    DOMAIN,
+    LANGUAGE_ABBREVIATION,
+)
 from .gateway import GatewayDeviceType
 
 CONF_EEP_SUPPORTED_BINARY_SENSOR = [

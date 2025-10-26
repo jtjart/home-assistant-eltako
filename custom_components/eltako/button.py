@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from eltakobus.eep import *
+from eltakobus.eep import A5_10_06, A5_10_12, A5_38_08, EEP, H5_3F_7F
 from eltakobus.message import Regular4BSMessage
 from eltakobus.util import AddressExpression
 
@@ -13,14 +13,25 @@ from homeassistant.components.button import (
     ButtonEntityDescription,
 )
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
-from .const import *
-from .device import *
+from .const import (
+    CONF_ENABLE_TEACH_IN_BUTTONS,
+    CONF_SENDER,
+    DOMAIN,
+    LOGGER,
+    MANUFACTURER,
+    PLATFORMS,
+)
+from .device import (
+    EltakoEntity,
+    log_entities_to_be_added,
+    validate_actuators_dev_and_sender_id,
+)
 from .gateway import EnOceanGateway
 
 EEP_WITH_TEACH_IN_BUTTONS = {
