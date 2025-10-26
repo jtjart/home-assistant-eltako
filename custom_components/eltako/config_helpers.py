@@ -1,5 +1,7 @@
 """Configuration helpers for the Eltako integration."""
 
+import logging
+
 from eltakobus.eep import EEP
 from eltakobus.util import AddressExpression, b2a
 
@@ -23,8 +25,9 @@ from .const import (
     DOMAIN,
     ELTAKO_CONFIG,
     GATEWAY_DEFAULT_NAME,
-    LOGGER,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 # default settings from configuration
 DEFAULT_GENERAL_SETTINGS = {
@@ -89,7 +92,7 @@ def get_general_settings_from_configuration(hass: HomeAssistant) -> dict:
     if hass and CONF_GERNERAL_SETTINGS in hass.data[DATA_ELTAKO][ELTAKO_CONFIG]:
         settings = hass.data[DATA_ELTAKO][ELTAKO_CONFIG][CONF_GERNERAL_SETTINGS]
 
-    # LOGGER.debug(f"General Settings: {settings}")
+    # _LOGGER.debug(f"General Settings: {settings}")
 
     return settings
 
@@ -102,7 +105,7 @@ async def async_get_gateway_config(
     config = await async_get_home_assistant_config(
         hass, CONFIG_SCHEMA, get_integration_config
     )
-    # LOGGER.debug(f"config: {config}")
+    # _LOGGER.debug(f"config: {config}")
     if CONF_GATEWAY in config:
         if (
             isinstance(config[CONF_GATEWAY], dict)
@@ -173,7 +176,7 @@ async def async_get_home_assistant_config(
 ) -> dict:
     _conf = await get_integration_config(hass, DOMAIN)
     if not _conf or DOMAIN not in _conf:
-        LOGGER.warning("No `eltako:` key found in configuration.yaml.")
+        _LOGGER.warning("No `eltako:` key found in configuration.yaml.")
         # generate defaults
         return CONFIG_SCHEMA({DOMAIN: {}})[DOMAIN]
     else:

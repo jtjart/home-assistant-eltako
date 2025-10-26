@@ -3,6 +3,7 @@
 import asyncio
 from datetime import UTC, datetime
 import glob
+import logging
 from os.path import basename, normpath
 
 from eltakobus.eep import EEP
@@ -22,12 +23,13 @@ from . import config_helpers
 from .const import (
     DOMAIN,
     GATEWAY_DEFAULT_NAME,
-    LOGGER,
     MANUFACTURER,
     SIGNAL_RECEIVE_MESSAGE,
     SIGNAL_SEND_MESSAGE,
     GatewayDeviceType,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_get_base_ids_of_registered_gateway(
@@ -206,7 +208,7 @@ class EnOceanGateway:
     ) -> bool:
         result = config_helpers.compare_enocean_ids(self.base_id[0], sender_id[0])
         if not result:
-            LOGGER.warn(
+            _LOGGER.warn(
                 f"{device_name} ({sender_id}): Maybe have wrong sender id configured!"
             )
         return result
@@ -228,7 +230,7 @@ class EnOceanGateway:
     ) -> bool:
         result = 0xFF == dev_id[0][0]
         if not result:
-            LOGGER.warn(
+            _LOGGER.warn(
                 f"{device_name} ({dev_id}): Maybe have wrong device id configured!"
             )
         return result
@@ -240,7 +242,7 @@ class EnOceanGateway:
             b"\x00\x00\x00\x00", dev_id[0], len=2
         )
         if not result:
-            LOGGER.warn(
+            _LOGGER.warn(
                 f"{device_name} ({dev_id}): Maybe have wrong device id configured!"
             )
         return result
@@ -256,7 +258,7 @@ class EnOceanGateway:
     async def async_setup(self):
         """Initialized serial bus and register callback function on HA event bus."""
         self._bus.start()
-        LOGGER.debug("[Gateway] [Id: %d] Was started.", self.dev_id)
+        _LOGGER.debug("[Gateway] [Id: %d] Was started.", self.dev_id)
 
         # receive messages from HA event bus
         event_id = config_helpers.get_bus_event_type(self.base_id, SIGNAL_SEND_MESSAGE)
@@ -277,7 +279,7 @@ class EnOceanGateway:
     # Command Section
     async def async_service_send_message(self, event, raise_exception=False) -> None:
         """Send an arbitrary message with the provided eep."""
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[Service Send Message: {event.service}] Received event data: {event.data}"
         )
 
@@ -285,7 +287,7 @@ class EnOceanGateway:
             sender_id_str = event.data.get("id", None)
             sender_id: AddressExpression = AddressExpression.parse(sender_id_str)
         except:
-            LOGGER.error(
+            _LOGGER.error(
                 f"[Service Send Message: {event.service}] No valid sender id defined. (Given sender id: {sender_id_str})"
             )
             return
@@ -294,7 +296,7 @@ class EnOceanGateway:
             sender_eep_str = event.data.get("eep", None)
             sender_eep: EEP = EEP.find(sender_eep_str)
         except:
-            LOGGER.error(
+            _LOGGER.error(
                 f"[Service Send Message: {event.service}] No valid sender id defined. (Given sender id: {sender_id_str})"
             )
             return
@@ -313,7 +315,7 @@ class EnOceanGateway:
             for filter_key in eep_init_args
             if filter_key in event.data and filter_key != "self"
         }
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[Service Send Message: {event.service}] Provided EEP ({sender_eep.__name__}) args: {knargs})"
         )
         uknargs = {
@@ -321,7 +323,7 @@ class EnOceanGateway:
             for filter_key in eep_init_args
             if filter_key not in event.data and filter_key != "self"
         }
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[Service Send Message: {event.service}] Missing EEP ({sender_eep.__name__}) args: {uknargs})"
         )
         eep_args = knargs
@@ -332,13 +334,13 @@ class EnOceanGateway:
         try:
             # create message
             msg = eep.encode_message(sender_id[0])
-            LOGGER.debug(
+            _LOGGER.debug(
                 f"[Service Send Message: {event.service}] Generated message: {msg} Serialized: {msg.serialize().hex()}"
             )
             # send message
             self.send_message(msg)
         except Exception as e:
-            LOGGER.error(
+            _LOGGER.error(
                 f"[Service Send Message: {event.service}] Cannot send message.",
                 exc_info=True,
                 stack_info=True,
@@ -356,7 +358,7 @@ class EnOceanGateway:
         if self.dispatcher_disconnect_handle:
             self._bus.stop()
             self._bus.join()
-            LOGGER.debug("[Gateway] [Id: %d] Was stopped.", self.dev_id)
+            _LOGGER.debug("[Gateway] [Id: %d] Was stopped.", self.dev_id)
             self.dispatcher_disconnect_handle()
             self.dispatcher_disconnect_handle = None
 
@@ -364,7 +366,7 @@ class EnOceanGateway:
         """Callback method call from HA when receiving events from serial bus."""
         if self._bus.is_active():
             if isinstance(msg, ESP2Message):
-                LOGGER.debug(
+                _LOGGER.debug(
                     "[Gateway] [Id: %d] Send message: %s - Serialized: %s",
                     self.dev_id,
                     msg,
@@ -374,7 +376,7 @@ class EnOceanGateway:
                 # put message on serial bus
                 self.hass.create_task(self._bus.send(msg))
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[Gateway] [Id: %d] Serial port %s is not available!!! message (%s) was not sent.",
                 self.dev_id,
                 self.serial_path,
@@ -389,7 +391,7 @@ class EnOceanGateway:
         """
 
         if type(message) not in [EltakoPoll]:
-            LOGGER.debug(
+            _LOGGER.debug(
                 "[Gateway] [Id: %d] Received message: %s", self.dev_id, message
             )
             self.process_messages()
@@ -471,5 +473,5 @@ def validate_path(path: str, baud_rate: int):
         serial.serial_for_url(path, baud_rate, timeout=0.1)
         return True
     except serial.SerialException as exception:
-        LOGGER.warning("Gateway path %s is invalid: %s", path, str(exception))
+        _LOGGER.warning("Gateway path %s is invalid: %s", path, str(exception))
         return False

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from eltakobus.eep import (
@@ -25,13 +26,15 @@ from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
 from .config_helpers import DeviceConf
-from .const import CONF_FAST_STATUS_CHANGE, CONF_SENDER, LOGGER
+from .const import CONF_FAST_STATUS_CHANGE, CONF_SENDER
 from .device import (
     EltakoEntity,
     log_entities_to_be_added,
     validate_actuators_dev_and_sender_id,
 )
 from .gateway import EnOceanGateway
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -67,8 +70,8 @@ async def async_setup_entry(
                 )
 
             except Exception as e:
-                LOGGER.warning("[%s] Could not load configuration", platform)
-                LOGGER.critical(e, exc_info=True)
+                _LOGGER.warning("[%s] Could not load configuration", platform)
+                _LOGGER.critical(e, exc_info=True)
 
     validate_actuators_dev_and_sender_id(entities)
     log_entities_to_be_added(entities, platform)
@@ -109,7 +112,7 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
 
         self.schedule_update_ha_state()
 
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{Platform.SWITCH} {str(self.dev_id)}] value initially loaded: [is_on: {self.is_on}, state: {self.state}]"
         )
 
@@ -138,7 +141,7 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.SWITCH,
                 str(self.dev_id),
@@ -175,7 +178,7 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.SWITCH,
                 str(self.dev_id),
@@ -192,7 +195,7 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[%s %s] Could not decode message: %s",
                 Platform.SWITCH,
                 str(self.dev_id),
@@ -224,7 +227,7 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
                 self.schedule_update_ha_state()
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Device EEP %s not supported.",
                 Platform.SWITCH,
                 str(self.dev_id),

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 
 from eltakobus.eep import (
     A5_04_01,
@@ -67,7 +68,6 @@ from .const import (
     DOMAIN,
     EVENT_BUTTON_PRESSED,
     LANGUAGE_ABBREVIATION,
-    LOGGER,
     MANUFACTURER,
     PLATFORMS,
 )
@@ -77,6 +77,8 @@ from .device import (
     validate_actuators_dev_and_sender_id,
 )
 from .gateway import EnOceanGateway
+
+_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_DEVICE_NAME_WINDOW_HANDLE = "Window handle"
 DEFAULT_DEVICE_NAME_WEATHER_STATION = "Weather station"
@@ -597,8 +599,8 @@ async def async_setup_entry(
                     # both are currently combined in illumination
 
             except Exception as e:
-                LOGGER.warning("[%s] Could not load configuration", platform)
-                LOGGER.critical(e, exc_info=True)
+                _LOGGER.warning("[%s] Could not load configuration", platform)
+                _LOGGER.critical(e, exc_info=True)
 
     # add labels for buttons
     if Platform.BINARY_SENSOR in config:
@@ -645,10 +647,10 @@ async def async_setup_entry(
                     )
 
             except Exception as e:
-                LOGGER.warning(
+                _LOGGER.warning(
                     "[%s] Could not load configuration", Platform.BINARY_SENSOR
                 )
-                LOGGER.critical(e, exc_info=True)
+                _LOGGER.critical(e, exc_info=True)
 
     # add id field for every device
     for pl in PLATFORMS:
@@ -670,10 +672,10 @@ async def async_setup_entry(
                     )
 
                 except Exception as e:
-                    LOGGER.warning(
+                    _LOGGER.warning(
                         "[%s] Could not load configuration", Platform.BINARY_SENSOR
                     )
-                    LOGGER.critical(e, exc_info=True)
+                    _LOGGER.critical(e, exc_info=True)
 
     # add gateway information
     entities.append(
@@ -741,13 +743,13 @@ class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
         return self.entity_description.name
 
     def load_value_initially(self, latest_state: State):
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{self._attr_ha_platform} {self.dev_id}] eneity unique_id: {self.unique_id}"
         )
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}"
         )
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}"
         )
         try:
@@ -791,7 +793,7 @@ class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
 
         self.schedule_update_ha_state()
 
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{self._attr_ha_platform} {self.dev_id} ({type(self).__name__})] value initially loaded: [native_value: {self.native_value}, state: {self.state}]"
         )
 
@@ -816,7 +818,7 @@ class EltakoPirSensor(EltakoSensor):
         try:
             decoded: A5_07_01 = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Motion Sensor %s] Could not decode message: %s", self.dev_id, str(e)
             )
             return
@@ -846,7 +848,7 @@ class EltakoVoltageSensor(EltakoSensor):
         try:
             decoded: A5_07_01 = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Voltage Sensor %s] Could not decode message: %s", self.dev_id, str(e)
             )
             return
@@ -898,7 +900,7 @@ class EltakoMeterSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Meter Sensor %s] Could not decode message: %s", self.dev_id, str(e)
             )
             return
@@ -967,7 +969,7 @@ class EltakoWindowHandle(EltakoSensor):
         try:
             decoded: F6_10_00 = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Window Handle Sensor %s] Could not decode message: %s",
                 self.dev_id,
                 str(e),
@@ -1010,7 +1012,7 @@ class EltakoWeatherStation(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Weather Station %s] Could not decode message: %s", self.dev_id, str(e)
             )
             return
@@ -1096,7 +1098,7 @@ class EltakoTemperatureSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Temperature Sensor %s] Could not decode message: %s",
                 self.dev_id,
                 str(e),
@@ -1131,7 +1133,7 @@ class EltakoIlluminationSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Illumination Sensor %s] Could not decode message: %s",
                 self.dev_id,
                 str(e),
@@ -1166,7 +1168,7 @@ class EltakoBatteryVoltageSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Battery Voltage Sensor %s] Could not decode message: %s",
                 self.dev_id,
                 str(e),
@@ -1205,7 +1207,7 @@ class EltakoTargetTemperatureSensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Target Temperature Sensor %s] Could not decode message: %s",
                 self.dev_id,
                 str(e),
@@ -1244,7 +1246,7 @@ class EltakoHumiditySensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Humidity Sensor %s] Could not decode message: %s", self.dev_id, str(e)
             )
             return
@@ -1294,7 +1296,7 @@ class EltakoAirQualitySensor(EltakoSensor):
         self.voc_type = voc_type
         # self._attr_suggested_unit_of_measurement = voc_type.unit
 
-        LOGGER.debug(
+        _LOGGER.debug(
             f"entity_description: {self.entity_description}, voc_type: {voc_type}"
         )
 
@@ -1303,7 +1305,7 @@ class EltakoAirQualitySensor(EltakoSensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Air Quality Sensor %s] Could not decode message: %s",
                 self.dev_id,
                 str(e),
@@ -1311,7 +1313,7 @@ class EltakoAirQualitySensor(EltakoSensor):
             return
 
         if decoded.voc_type.index == self.voc_type.index:
-            # LOGGER.debug(f"[EltakoAirQualitySensor] received message - concentration: {decoded.concentration}, voc_type: {decoded.voc_type}, voc_unit: {decoded.voc_unit}")
+            # _LOGGER.debug(f"[EltakoAirQualitySensor] received message - concentration: {decoded.concentration}, voc_type: {decoded.voc_type}, voc_unit: {decoded.voc_unit}")
             self._attr_native_value = decoded.concentration
 
         self.schedule_update_ha_state()
@@ -1358,7 +1360,7 @@ class GatewayLastReceivedMessage(EltakoSensor):
 
     def value_changed(self, value: datetime) -> None:
         """Update the current value."""
-        # LOGGER.debug("[%s] Last message received", Platform.SENSOR)
+        # _LOGGER.debug("[%s] Last message received", Platform.SENSOR)
 
         if isinstance(value, datetime):
             self.native_value = value
@@ -1409,7 +1411,7 @@ class GatewayReceivedMessagesInActiveSession(EltakoSensor):
 
     def value_changed(self, value: int) -> None:
         """Update the current value."""
-        # LOGGER.debug("[%s] received amount of messages: %s", Platform.SENSOR, str(value))
+        # _LOGGER.debug("[%s] received amount of messages: %s", Platform.SENSOR, str(value))
 
         self.native_value = value
         self.schedule_update_ha_state()
@@ -1516,13 +1518,13 @@ class EventListenerInfoField(EltakoSensor):
         self._attr_native_value = ""
         self.listen_to_addresses.clear()
 
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{platform}] [{EventListenerInfoField.__name__}] [{b2s(dev_id[0])}] [{key}] Register event: {event_id}"
         )
         self.hass.bus.async_listen(event_id, self.value_changed)
 
     def value_changed(self, event) -> None:
-        LOGGER.debug(f"Received event: {event}")
+        _LOGGER.debug(f"Received event: {event}")
         self.native_value = self.convert_event_function(event)
 
         self.schedule_update_ha_state()

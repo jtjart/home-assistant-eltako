@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from eltakobus.eep import A5_10_06, A5_10_12, A5_38_08, EEP, H5_3F_7F
 from eltakobus.message import Regular4BSMessage
 from eltakobus.util import AddressExpression
@@ -23,7 +25,6 @@ from .const import (
     CONF_ENABLE_TEACH_IN_BUTTONS,
     CONF_SENDER,
     DOMAIN,
-    LOGGER,
     MANUFACTURER,
     PLATFORMS,
 )
@@ -33,6 +34,8 @@ from .device import (
     validate_actuators_dev_and_sender_id,
 )
 from .gateway import EnOceanGateway
+
+_LOGGER = logging.getLogger(__name__)
 
 EEP_WITH_TEACH_IN_BUTTONS = {
     A5_10_06: b"\x40\x30\x0d\x85",  # climate
@@ -59,7 +62,7 @@ async def async_setup_entry(
 
     # if not supported by gateway skip creating teach-in button
     if not gateway.general_settings[CONF_ENABLE_TEACH_IN_BUTTONS]:
-        LOGGER.debug(
+        _LOGGER.debug(
             "[%s] Teach-in buttons are not supported by gateway %s",
             Platform.BUTTON,
             gateway.dev_name,
@@ -90,10 +93,10 @@ async def async_setup_entry(
                                     )
                                 )
                         except Exception as e:
-                            LOGGER.warning(
+                            _LOGGER.warning(
                                 "[%s] Could not load configuration", platform
                             )
-                            LOGGER.critical(e, exc_info=True)
+                            _LOGGER.critical(e, exc_info=True)
 
     # add reconnect button for gateway
     entities.append(GatewayReconnectButton(platform, gateway))

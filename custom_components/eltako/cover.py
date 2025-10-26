@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from typing import Any
 
@@ -36,7 +37,6 @@ from .const import (
     CONF_TIME_CLOSES,
     CONF_TIME_OPENS,
     CONF_TIME_TILTS,
-    LOGGER,
 )
 from .device import (
     EltakoEntity,
@@ -44,6 +44,8 @@ from .device import (
     validate_actuators_dev_and_sender_id,
 )
 from .gateway import EnOceanGateway
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -91,8 +93,8 @@ async def async_setup_entry(
                 )
 
             except Exception as e:
-                LOGGER.warning("[%s] Could not load configuration", platform)
-                LOGGER.critical(e, exc_info=True)
+                _LOGGER.warning("[%s] Could not load configuration", platform)
+                _LOGGER.critical(e, exc_info=True)
 
     validate_actuators_dev_and_sender_id(entities)
     log_entities_to_be_added(entities, platform)
@@ -142,8 +144,8 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self._attr_supported_features |= CoverEntityFeature.SET_POSITION
 
     def load_value_initially(self, latest_state: State):
-        # LOGGER.debug(f"[cover {self.dev_id}] latest state: {latest_state.state}")
-        # LOGGER.debug(f"[cover {self.dev_id}] latest state attributes: {latest_state.attributes}")
+        # _LOGGER.debug(f"[cover {self.dev_id}] latest state: {latest_state.state}")
+        # _LOGGER.debug(f"[cover {self.dev_id}] latest state attributes: {latest_state.attributes}")
         try:
             self._attr_current_cover_position = latest_state.attributes.get(
                 "current_position", None
@@ -156,7 +158,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
                 self._attr_current_cover_position is None
                 or self._attr_current_cover_tilt_position is None
             ):
-                LOGGER.warning(
+                _LOGGER.warning(
                     f"[cover {self.dev_id}] Missing 'current_position' or 'current_tilt_position' in latest_state.attributes. Defaulting to None."
                 )
 
@@ -181,12 +183,12 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
                 self._attr_is_closing = False
                 self._attr_is_closed = False
             else:
-                LOGGER.warning(
+                _LOGGER.warning(
                     f"[cover {self.dev_id}] Unknown state: {latest_state.state}"
                 )
 
         except KeyError as e:
-            LOGGER.error(
+            _LOGGER.error(
                 f"[cover {self.dev_id}] KeyError while accessing attributes: {e}"
             )
             self._attr_current_cover_position = None
@@ -195,7 +197,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self._attr_is_closing = None
             self._attr_is_closed = None
         except Exception as e:
-            LOGGER.error(
+            _LOGGER.error(
                 f"[cover {self.dev_id}] Unexpected error in load_value_initially: {e}"
             )
             self._attr_current_cover_position = None
@@ -206,7 +208,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             raise e
 
         self.schedule_update_ha_state()
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[cover {self.dev_id}] value initially loaded: ["
             + f"is_opening: {self.is_opening}, "
             + f"is_closing: {self.is_closing}, "
@@ -230,7 +232,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.COVER,
                 str(self.dev_id),
@@ -260,7 +262,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.COVER,
                 str(self.dev_id),
@@ -329,7 +331,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self.send_message(msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.COVER,
                 str(self.dev_id),
@@ -366,11 +368,11 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning("Could not decode message: %s", str(e))
+            _LOGGER.warning("Could not decode message: %s", str(e))
             return
 
         if self.dev_eep in [G5_3F_7F]:
-            LOGGER.debug(f"[cover {self.dev_id}] G5_3F_7F - {decoded.__dict__}")
+            _LOGGER.debug(f"[cover {self.dev_id}] G5_3F_7F - {decoded.__dict__}")
 
             ## is received as response when button pushed (command was sent)
             ## this message is received directly when the cover starts to move
@@ -453,7 +455,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
                     self._attr_is_opening = False
                     self._attr_is_closing = False
 
-            LOGGER.debug(
+            _LOGGER.debug(
                 f"[cover {self.dev_id}] state: {self.state}, opening: {self.is_opening}, closing: {self.is_closing}, closed: {self.is_closed}, position: {self._attr_current_cover_position}"
             )
 

@@ -1,6 +1,7 @@
 """Config flows for the Eltako integration."""
 
 import ipaddress
+import logging
 
 import voluptuous as vol
 
@@ -17,10 +18,11 @@ from .const import (
     ERROR_INVALID_GATEWAY_PATH,
     ERROR_NO_GATEWAY_CONFIGURATION_AVAILABLE,
     ERROR_NO_SERIAL_PATH_AVAILABLE,
-    LOGGER,
     GatewayDeviceType,
 )
 from .schema import CONFIG_SCHEMA
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class EltakoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
@@ -49,34 +51,34 @@ class EltakoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input=None):
         """Handle an Eltako config flow start."""
         # is called when adding a new gateway
-        LOGGER.debug("config_flow user step started.")
+        _LOGGER.debug("config_flow user step started.")
         return await self.async_step_detect()
 
     async def async_step_detect(self, user_input=None):
         """Propose a list of detected gateways."""
-        LOGGER.debug("config_flow detect step started.")
+        _LOGGER.debug("config_flow detect step started.")
         return await self.manual_selection_routine(user_input)
 
     async def async_step_manual(self, user_input=None):
         """Request manual USB gateway path."""
-        LOGGER.debug("config_flow manual step started.")
+        _LOGGER.debug("config_flow manual step started.")
         return await self.manual_selection_routine(user_input, manual_setp=True)
 
     async def manual_selection_routine(
         self, user_input=None, manual_setp: bool = False
     ):
-        LOGGER.debug("Add new gateway")
+        _LOGGER.debug("Add new gateway")
         errors = {}
 
         # get configuration for debug purpose
         config = await config_helpers.async_get_home_assistant_config(
             self.hass, CONFIG_SCHEMA
         )
-        LOGGER.debug(f"Config: {config}\n")
+        _LOGGER.debug(f"Config: {config}\n")
 
         # ensure data entry is set
         if DATA_ELTAKO not in self.hass.data:
-            LOGGER.debug("No configuration available.")
+            _LOGGER.debug("No configuration available.")
             self.hass.data.setdefault(DATA_ELTAKO, {})
 
         # goes recursively ...
@@ -99,9 +101,9 @@ class EltakoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         g_list = list(
             [g for g in g_list_dict.values() if g not in self.hass.data[DATA_ELTAKO]]
         )
-        LOGGER.debug("Available gateways to be added: %s", g_list)
+        _LOGGER.debug("Available gateways to be added: %s", g_list)
         if len(g_list) == 0:
-            LOGGER.debug("No gateways are configured in the 'configuration.yaml'.")
+            _LOGGER.debug("No gateways are configured in the 'configuration.yaml'.")
             errors = {
                 CONF_GATEWAY_DESCRIPTION: ERROR_NO_GATEWAY_CONFIGURATION_AVAILABLE
             }
@@ -128,10 +130,10 @@ class EltakoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 ]
             )
         )
-        LOGGER.debug("Available serial paths/IP addresses: %s", serial_paths)
+        _LOGGER.debug("Available serial paths/IP addresses: %s", serial_paths)
 
         if manual_setp or len(serial_paths) == 0:
-            LOGGER.debug("No usb port or any manually configured address available.")
+            _LOGGER.debug("No usb port or any manually configured address available.")
             errors = {CONF_SERIAL_PATH: ERROR_NO_SERIAL_PATH_AVAILABLE}
 
             return self.async_show_form(
@@ -196,7 +198,7 @@ class EltakoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             path_is_valid = await self.hass.async_add_executor_job(
                 gateway.validate_path, serial_path, baud_rate
             )
-            LOGGER.debug(
+            _LOGGER.debug(
                 "serial_path: %s, validated with baud rate %d is %s",
                 serial_path,
                 baud_rate,

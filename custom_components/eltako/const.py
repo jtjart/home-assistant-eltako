@@ -1,7 +1,6 @@
 """Constants for the Eltako integration."""
 
 from enum import Enum
-import logging
 from typing import Final
 
 from strenum import StrEnum
@@ -25,8 +24,6 @@ SIGNAL_RECEIVE_MESSAGE: Final = "receive_message"
 SIGNAL_SEND_MESSAGE: Final = "send_message"
 EVENT_BUTTON_PRESSED: Final = "btn_pressed"
 EVENT_CONTACT_CLOSED: Final = "contact_closed"
-
-LOGGER: Final = logging.getLogger(DOMAIN)
 
 CONF_UNKNOWN: Final = "unknown"
 CONF_REGISTERED_IN: Final = "registered_in"

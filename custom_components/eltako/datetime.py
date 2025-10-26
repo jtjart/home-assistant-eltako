@@ -1,6 +1,7 @@
 """Support for Eltako datetime entities."""
 
 import datetime
+import logging
 
 from homeassistant import config_entries
 from homeassistant.components.datetime import DateTimeEntity
@@ -12,13 +13,15 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
 
 from . import get_device_config_for_gateway, get_gateway_from_hass
-from .const import DOMAIN, LOGGER, MANUFACTURER
+from .const import DOMAIN, MANUFACTURER
 from .device import (
     EltakoEntity,
     log_entities_to_be_added,
     validate_actuators_dev_and_sender_id,
 )
 from .gateway import EnOceanGateway
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -71,7 +74,7 @@ class GatewayLastReceivedMessage(EltakoEntity, DateTimeEntity):
             raise e
 
         self.schedule_update_ha_state()
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[datetime {self.dev_id}] value initially loaded: [native_value: {self.native_value}, state: {self.state}]"
         )
 

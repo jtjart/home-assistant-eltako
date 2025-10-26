@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from eltakobus.eep import (
@@ -25,13 +26,15 @@ from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
 from .config_helpers import DeviceConf
-from .const import CONF_FAST_STATUS_CHANGE, CONF_SENDER, LOGGER
+from .const import CONF_FAST_STATUS_CHANGE, CONF_SENDER
 from .device import (
     EltakoEntity,
     log_entities_to_be_added,
     validate_actuators_dev_and_sender_id,
 )
 from .gateway import EnOceanGateway
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -80,10 +83,10 @@ async def async_setup_entry(
                     )
 
             except Exception as e:
-                LOGGER.warning(
+                _LOGGER.warning(
                     "[%s %s] Could not load configuration", platform, str(dev_conf.id)
                 )
-                LOGGER.critical(e, exc_info=True)
+                _LOGGER.critical(e, exc_info=True)
 
     validate_actuators_dev_and_sender_id(entities)
     log_entities_to_be_added(entities, platform)
@@ -92,8 +95,8 @@ async def async_setup_entry(
 
 class AbstractLightEntity(EltakoEntity, LightEntity, RestoreEntity):
     def load_value_initially(self, latest_state: State):
-        # LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}")
-        # LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}")
+        # _LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}")
+        # _LOGGER.debug(f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}")
         try:
             if "unknown" == latest_state.state:
                 self._attr_is_on = None
@@ -111,7 +114,7 @@ class AbstractLightEntity(EltakoEntity, LightEntity, RestoreEntity):
 
         self.schedule_update_ha_state()
 
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{Platform.LIGHT} {self.dev_id}] value initially loaded: [is_on: {self.is_on}, brightness: {self.brightness}, state: {self.state}]"
         )
 
@@ -167,7 +170,7 @@ class EltakoDimmableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -206,7 +209,7 @@ class EltakoDimmableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -229,11 +232,11 @@ class EltakoDimmableLight(AbstractLightEntity):
             if msg.org == 0x07:
                 decoded: A5_38_08 = self.dev_eep.decode_message(msg)
             elif msg.org == 0x05:
-                LOGGER.debug("[Dimmable Light] Ignore on/off message with org=0x05")
+                _LOGGER.debug("[Dimmable Light] Ignore on/off message with org=0x05")
                 return
 
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[Dimmable Light] Could not decode message: %s %s", type(e), str(e)
             )
             return
@@ -262,7 +265,7 @@ class EltakoDimmableLight(AbstractLightEntity):
             self.schedule_update_ha_state()
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Device EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -317,7 +320,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -355,7 +358,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
             self.send_message(released_msg)
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Sender EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -372,7 +375,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
         try:
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            LOGGER.warning(
+            _LOGGER.warning(
                 "[%s %s] Could not decode message: %s",
                 Platform.LIGHT,
                 str(self.dev_id),
@@ -385,7 +388,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
             self.schedule_update_ha_state()
 
         else:
-            LOGGER.warn(
+            _LOGGER.warn(
                 "[%s %s] Device EEP %s not supported.",
                 Platform.LIGHT,
                 str(self.dev_id),

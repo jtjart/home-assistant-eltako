@@ -1,5 +1,7 @@
 """Representation of an Eltako device."""
 
+import logging
+
 from eltakobus.eep import EEP
 from eltakobus.message import (
     EltakoWrapped1BS,
@@ -20,14 +22,10 @@ from homeassistant.helpers.entity_platform import DATA_ENTITY_PLATFORM
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import config_helpers
-from .const import (
-    DOMAIN,
-    LOGGER,
-    MANUFACTURER,
-    SIGNAL_RECEIVE_MESSAGE,
-    SIGNAL_SEND_MESSAGE,
-)
+from .const import DOMAIN, MANUFACTURER, SIGNAL_RECEIVE_MESSAGE, SIGNAL_SEND_MESSAGE
 from .gateway import EnOceanGateway
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class EltakoEntity(Entity):
@@ -63,7 +61,7 @@ class EltakoEntity(Entity):
         )
         self.entity_id = f"{self._attr_ha_platform}.{self._attr_unique_id}"
 
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{self._attr_ha_platform} {self.dev_id}] Added entity {self.dev_name} ({type(self).__name__})."
         )
 
@@ -137,13 +135,13 @@ class EltakoEntity(Entity):
 
     def load_value_initially(self, latest_state: State):
         """This function is implemented in the concrete devices classes"""
-        LOGGER.warn(
+        _LOGGER.warn(
             f"[{self._attr_ha_platform} {self.dev_id}] DOES NOT HAVE AN IMPLEMENTATION FOR: load_value_initially()"
         )
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}"
         )
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}"
         )
 
@@ -235,7 +233,7 @@ def log_entities_to_be_added(entities: list[EltakoEntity], platform: Platform) -
         temp_eep = ""
         if e.dev_eep:
             temp_eep = f"eep: {e.dev_eep.eep_string}),"
-        LOGGER.debug(
+        _LOGGER.debug(
             f"[{platform} {e.dev_id}] Add entity {e.dev_name} (id: {e.dev_id},{temp_eep} gw: {e.gateway.dev_name}) to Home Assistant."
         )
 
@@ -247,7 +245,7 @@ def get_entity_from_hass(
     for platform in entity_platforms:
         if platform.domain == domain:
             for entity in platform.entities.values():
-                LOGGER.debug(
+                _LOGGER.debug(
                     f"checking entity type: {type(entity)}, dev_eep: {entity.dev_eep.eep_string}, dev_id: {entity.dev_id}"
                 )
                 if entity.dev_id == dev_id:
