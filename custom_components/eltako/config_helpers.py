@@ -1,3 +1,5 @@
+"""Configuration helpers for the Eltako integration."""
+
 from eltakobus.eep import EEP
 from eltakobus.util import AddressExpression, b2a
 

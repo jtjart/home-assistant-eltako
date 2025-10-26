@@ -1,3 +1,5 @@
+"""Support for Eltako datetime entities."""
+
 import datetime
 
 from homeassistant import config_entries

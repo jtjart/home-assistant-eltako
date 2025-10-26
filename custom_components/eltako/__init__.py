@@ -1,4 +1,4 @@
-"""Support for Eltako devices."""
+"""The Eltako integration."""
 
 from eltakobus.util import AddressExpression
 
