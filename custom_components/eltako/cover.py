@@ -144,8 +144,6 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self._attr_supported_features |= CoverEntityFeature.SET_POSITION
 
     def load_value_initially(self, latest_state: State):
-        # _LOGGER.debug(f"[cover {self.dev_id}] latest state: {latest_state.state}")
-        # _LOGGER.debug(f"[cover {self.dev_id}] latest state attributes: {latest_state.attributes}")
         try:
             self._attr_current_cover_position = latest_state.attributes.get(
                 "current_position", None

@@ -92,8 +92,6 @@ def get_general_settings_from_configuration(hass: HomeAssistant) -> dict:
     if hass and CONF_GERNERAL_SETTINGS in hass.data[DATA_ELTAKO][ELTAKO_CONFIG]:
         settings = hass.data[DATA_ELTAKO][ELTAKO_CONFIG][CONF_GERNERAL_SETTINGS]
 
-    # _LOGGER.debug(f"General Settings: {settings}")
-
     return settings
 
 
@@ -105,7 +103,6 @@ async def async_get_gateway_config(
     config = await async_get_home_assistant_config(
         hass, CONFIG_SCHEMA, get_integration_config
     )
-    # _LOGGER.debug(f"config: {config}")
     if CONF_GATEWAY in config:
         if (
             isinstance(config[CONF_GATEWAY], dict)

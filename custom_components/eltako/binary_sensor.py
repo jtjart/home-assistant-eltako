@@ -273,7 +273,6 @@ class EltakoBinarySensor(AbstractBinarySensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
             _LOGGER.debug("decoded : %s", json.dumps(decoded.__dict__))
-            # _LOGGER.debug("msg : %s, data: %s", type(msg), msg.data)
         except Exception as e:
             _LOGGER.warning(
                 "[%s] Could not decode message for eep %s does not fit to message type %s (org %s)",
@@ -285,7 +284,6 @@ class EltakoBinarySensor(AbstractBinarySensor):
             return
 
         if self.dev_eep in [F6_02_01, F6_02_02]:
-            # _LOGGER.debug("[Binary Sensor][%s] Received msg for processing eep %s telegram.", b2s(self.dev_id[0]), self.dev_eep.eep_string)
             pressed_buttons = []
             pressed = decoded.energy_bow == 1
             two_buttons_pressed = decoded.second_action == 1
@@ -409,8 +407,6 @@ class EltakoBinarySensor(AbstractBinarySensor):
             return
 
         elif self.dev_eep in [F6_10_00]:
-            # _LOGGER.debug("[Binary Sensor][%s] Received msg for processing eep %s telegram.", b2s(self.dev_id[0]), self.dev_eep.eep_string)
-
             # is_on == True => open
             self._attr_is_on = decoded.handle_position > 0
 
@@ -418,7 +414,6 @@ class EltakoBinarySensor(AbstractBinarySensor):
                 self._attr_is_on = not self._attr_is_on
 
         elif self.dev_eep in [D5_00_01]:
-            # _LOGGER.debug("[Binary Sensor][%s] Received msg for processing eep %s telegram.", b2s(self.dev_id[0]), self.dev_eep.eep_string)
             # learn button: 0=pressed, 1=not pressed
             if decoded.learn_button == 0:
                 return
@@ -431,7 +426,6 @@ class EltakoBinarySensor(AbstractBinarySensor):
 
         elif self.dev_eep in [A5_08_01]:
             # Occupancy Sensor
-            # _LOGGER.debug("[Binary Sensor][%s] Received msg for processing eep %s telegram.", b2s(self.dev_id[0]), self.dev_eep.eep_string)
             if decoded.learn_button == 0:
                 return
 
@@ -441,8 +435,6 @@ class EltakoBinarySensor(AbstractBinarySensor):
                 self._attr_is_on = not self._attr_is_on
 
         elif self.dev_eep in [A5_07_01]:
-            # _LOGGER.debug("[Binary Sensor][%s] Received msg for processing eep %s telegram.", b2s(self.dev_id[0]), self.dev_eep.eep_string)
-
             self._attr_is_on = decoded.pir_status_on == 1
 
             if self.invert_signal:

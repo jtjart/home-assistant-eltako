@@ -213,10 +213,6 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         )
 
     def load_value_initially(self, latest_state: State):
-        # _LOGGER.debug(f"[climate {self.dev_id}] eneity unique_id: {self.unique_id}")
-        # _LOGGER.debug(f"[climate {self.dev_id}] latest state - state: {latest_state.state}")
-        # _LOGGER.debug(f"[climate {self.dev_id}] latest state - attributes: {latest_state.attributes}")
-
         try:
             self.hvac_modes = []
             for m_str in latest_state.attributes.get("hvac_modes", []):
@@ -257,7 +253,6 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
     async def _wrapped_update(self, *args) -> None:
         while True:
             try:
-                # _LOGGER.debug(f"[climate {self.dev_id}] Wait {self._update_frequency}s for next status update.")
                 await asyncio.sleep(self._update_frequency)
 
                 # fakes physical switch and sends frequently in cooling state.
@@ -278,10 +273,9 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
 
     async def async_handle_event(self, call):
         """Receives signal from cooling switches if defined in configuration."""
-        # _LOGGER.debug(f"[climate {self.dev_id}] Event received: {call.data}")
 
         _LOGGER.debug(
-            "[climate %s] Cooling Switch %s for button %s timestamp set.",
+            "[%s] Cooling Switch %s for button %s timestamp set",
             self.dev_id,
             call.data["switch_address"],
             hex(call.data["data"]),
@@ -392,7 +386,6 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
 
         # does cooling signal stays within the time range?
         else:
-            # _LOGGER.debug(f"[climate {self.dev_id}] Cooling mode switch last_received_signal:{self.cooling_switch_last_signal_timestamp}")
             if (
                 time.time() - self.cooling_switch_last_signal_timestamp
             ) / 60.0 <= self.COOLING_SWITCH_SIGNAL_FREQUENCY_IN_MIN:
@@ -403,7 +396,6 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         return HVACMode.HEAT
 
     async def _async_check_if_cooling_is_activated(self) -> None:
-        # _LOGGER.debug(f"[climate {self.dev_id}] Check if cooling switch is activated.")
         new_mode = self._get_mode()
         if new_mode != self._hvac_mode_from_heating:
             self._hvac_mode_from_heating = new_mode
@@ -432,7 +424,7 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         # Implemented via eventing: async_handle_event
         # if self.cooling_switch:
         #     if msg.address == self.cooling_switch.id[0]:
-        #         _LOGGER.debug(f"[climate {self.dev_id}] Change mode triggered by cooling switch: {self.cooling_switch.id[0]}")
+        #         _LOGGER.debug(f"[{self.dev_id}] Change mode triggered by cooling switch: {self.cooling_switch.id[0]}")
         #         _LOGGER.debug(f"NOT YET IMPLEMENTED")
 
     def change_temperature_values(self, msg: ESP2Message) -> None:

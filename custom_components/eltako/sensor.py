@@ -1321,7 +1321,6 @@ class EltakoAirQualitySensor(EltakoSensor):
             return
 
         if decoded.voc_type.index == self.voc_type.index:
-            # _LOGGER.debug(f"[EltakoAirQualitySensor] received message - concentration: {decoded.concentration}, voc_type: {decoded.voc_type}, voc_unit: {decoded.voc_unit}")
             self._attr_native_value = decoded.concentration
 
         self.schedule_update_ha_state()
@@ -1368,7 +1367,6 @@ class GatewayLastReceivedMessage(EltakoSensor):
 
     def value_changed(self, value: datetime) -> None:
         """Update the current value."""
-        # _LOGGER.debug("[%s] Last message received", Platform.SENSOR)
 
         if isinstance(value, datetime):
             self.native_value = value
@@ -1419,7 +1417,6 @@ class GatewayReceivedMessagesInActiveSession(EltakoSensor):
 
     def value_changed(self, value: int) -> None:
         """Update the current value."""
-        # _LOGGER.debug("[%s] received amount of messages: %s", Platform.SENSOR, str(value))
 
         self.native_value = value
         self.schedule_update_ha_state()
