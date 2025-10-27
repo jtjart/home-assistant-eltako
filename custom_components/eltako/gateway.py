@@ -358,10 +358,9 @@ class EnOceanGateway:
             # send message
             self.send_message(msg)
         except Exception as e:
-            _LOGGER.error(
+            _LOGGER.exception(
                 "[Service Send Message: %s] Cannot send message",
                 event.service,
-                exc_info=True,
                 stack_info=True,
             )
             if raise_exception:
