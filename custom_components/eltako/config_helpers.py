@@ -176,7 +176,7 @@ async def async_get_home_assistant_config(
 ) -> dict:
     _conf = await get_integration_config(hass, DOMAIN)
     if not _conf or DOMAIN not in _conf:
-        _LOGGER.warning("No `eltako:` key found in configuration.yaml.")
+        _LOGGER.warning("No 'eltako:' key found in configuration.yaml")
         # generate defaults
         return CONFIG_SCHEMA({DOMAIN: {}})[DOMAIN]
     else:

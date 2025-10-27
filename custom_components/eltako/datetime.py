@@ -75,7 +75,10 @@ class GatewayLastReceivedMessage(EltakoEntity, DateTimeEntity):
 
         self.schedule_update_ha_state()
         _LOGGER.debug(
-            f"[datetime {self.dev_id}] value initially loaded: [native_value: {self.native_value}, state: {self.state}]"
+            "[%s] value initially loaded: [native_value: %s, state: %s]",
+            self.dev_id,
+            self.native_value,
+            self.state,
         )
 
     @property

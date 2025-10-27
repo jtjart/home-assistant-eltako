@@ -63,8 +63,7 @@ async def async_setup_entry(
     # if not supported by gateway skip creating teach-in button
     if not gateway.general_settings[CONF_ENABLE_TEACH_IN_BUTTONS]:
         _LOGGER.debug(
-            "[%s] Teach-in buttons are not supported by gateway %s",
-            Platform.BUTTON,
+            "Teach-in buttons are not supported by gateway %s",
             gateway.dev_name,
         )
 
@@ -93,9 +92,7 @@ async def async_setup_entry(
                                     )
                                 )
                         except Exception as e:
-                            _LOGGER.warning(
-                                "[%s] Could not load configuration", platform
-                            )
+                            _LOGGER.warning("Could not load configuration")
                             _LOGGER.critical(e, exc_info=True)
 
     # add reconnect button for gateway

@@ -209,7 +209,9 @@ class EnOceanGateway:
         result = config_helpers.compare_enocean_ids(self.base_id[0], sender_id[0])
         if not result:
             _LOGGER.warning(
-                f"{device_name} ({sender_id}): Maybe have wrong sender id configured!"
+                "%s (%s): Maybe have wrong sender id configured",
+                device_name,
+                sender_id,
             )
         return result
 
@@ -231,7 +233,7 @@ class EnOceanGateway:
         result = 0xFF == dev_id[0][0]
         if not result:
             _LOGGER.warning(
-                f"{device_name} ({dev_id}): Maybe have wrong device id configured!"
+                "%s (%s): Maybe have wrong device id configured!", device_name, dev_id
             )
         return result
 
@@ -243,7 +245,7 @@ class EnOceanGateway:
         )
         if not result:
             _LOGGER.warning(
-                f"{device_name} ({dev_id}): Maybe have wrong device id configured!"
+                "%s (%s): Maybe have wrong device id configured!", device_name, dev_id
             )
         return result
 
@@ -258,7 +260,7 @@ class EnOceanGateway:
     async def async_setup(self):
         """Initialized serial bus and register callback function on HA event bus."""
         self._bus.start()
-        _LOGGER.debug("[Gateway] [Id: %d] Was started.", self.dev_id)
+        _LOGGER.debug("[Id: %d] was started", self.dev_id)
 
         # receive messages from HA event bus
         event_id = config_helpers.get_bus_event_type(self.base_id, SIGNAL_SEND_MESSAGE)
@@ -277,10 +279,13 @@ class EnOceanGateway:
         )
 
     # Command Section
+    # TODO: This seems to only be used in tests, remove?
     async def async_service_send_message(self, event, raise_exception=False) -> None:
         """Send an arbitrary message with the provided eep."""
         _LOGGER.debug(
-            f"[Service Send Message: {event.service}] Received event data: {event.data}"
+            "[Service Send Message: %s] Received event data: %s",
+            event.service,
+            event.data,
         )
 
         try:
@@ -288,7 +293,9 @@ class EnOceanGateway:
             sender_id: AddressExpression = AddressExpression.parse(sender_id_str)
         except:
             _LOGGER.error(
-                f"[Service Send Message: {event.service}] No valid sender id defined. (Given sender id: {sender_id_str})"
+                "[Service Send Message: %s] No valid sender id defined. (Given sender id: %s)",
+                event.service,
+                sender_id_str,
             )
             return
 
@@ -297,7 +304,9 @@ class EnOceanGateway:
             sender_eep: EEP = EEP.find(sender_eep_str)
         except:
             _LOGGER.error(
-                f"[Service Send Message: {event.service}] No valid sender id defined. (Given sender id: {sender_id_str})"
+                "[Service Send Message: %s] No valid sender id defined. (Given sender id: %s)",
+                event.service,
+                sender_id_str,
             )
             return
 
@@ -316,7 +325,10 @@ class EnOceanGateway:
             if filter_key in event.data and filter_key != "self"
         }
         _LOGGER.debug(
-            f"[Service Send Message: {event.service}] Provided EEP ({sender_eep.__name__}) args: {knargs})"
+            "[Service Send Message: %s] Provided EEP (%s) args: %s)",
+            event.services,
+            sender_eep.__name__,
+            knargs,
         )
         uknargs = {
             filter_key: 0
@@ -324,7 +336,10 @@ class EnOceanGateway:
             if filter_key not in event.data and filter_key != "self"
         }
         _LOGGER.debug(
-            f"[Service Send Message: {event.service}] Missing EEP ({sender_eep.__name__}) args: {uknargs})"
+            "[Service Send Message: %s] Missing EEP (%s) args: %s)",
+            event.services,
+            sender_eep.__name__,
+            uknargs,
         )
         eep_args = knargs
         eep_args.update(uknargs)
@@ -335,13 +350,17 @@ class EnOceanGateway:
             # create message
             msg = eep.encode_message(sender_id[0])
             _LOGGER.debug(
-                f"[Service Send Message: {event.service}] Generated message: {msg} Serialized: {msg.serialize().hex()}"
+                "[Service Send Message: %s] Generated message: %s Serialized: %s",
+                event.service,
+                msg,
+                msg.serialize().hex(),
             )
             # send message
             self.send_message(msg)
         except Exception as e:
             _LOGGER.error(
-                f"[Service Send Message: {event.service}] Cannot send message.",
+                "[Service Send Message: %s] Cannot send message",
+                event.service,
                 exc_info=True,
                 stack_info=True,
             )
@@ -358,7 +377,7 @@ class EnOceanGateway:
         if self.dispatcher_disconnect_handle:
             self._bus.stop()
             self._bus.join()
-            _LOGGER.debug("[Gateway] [Id: %d] Was stopped.", self.dev_id)
+            _LOGGER.debug("[Id: %d] was stopped", self.dev_id)
             self.dispatcher_disconnect_handle()
             self.dispatcher_disconnect_handle = None
 
@@ -367,7 +386,7 @@ class EnOceanGateway:
         if self._bus.is_active():
             if isinstance(msg, ESP2Message):
                 _LOGGER.debug(
-                    "[Gateway] [Id: %d] Send message: %s - Serialized: %s",
+                    "[Id: %d] Send message: %s - Serialized: %s",
                     self.dev_id,
                     msg,
                     msg.serialize().hex(),
@@ -377,7 +396,7 @@ class EnOceanGateway:
                 self.hass.create_task(self._bus.send(msg))
         else:
             _LOGGER.warning(
-                "[Gateway] [Id: %d] Serial port %s is not available!!! message (%s) was not sent.",
+                "[Id: %d] Serial port %s is not available!!! message (%s) was not sent",
                 self.dev_id,
                 self.serial_path,
                 msg,
@@ -391,9 +410,7 @@ class EnOceanGateway:
         """
 
         if type(message) not in [EltakoPoll]:
-            _LOGGER.debug(
-                "[Gateway] [Id: %d] Received message: %s", self.dev_id, message
-            )
+            _LOGGER.debug("[Id: %d] Received message: %s", self.dev_id, message)
             self.process_messages()
 
             if isinstance(message, ESP2Message):
@@ -473,5 +490,5 @@ def validate_path(path: str, baud_rate: int):
         serial.serial_for_url(path, baud_rate, timeout=0.1)
         return True
     except serial.SerialException as exception:
-        _LOGGER.warning("Gateway path %s is invalid: %s", path, str(exception))
+        _LOGGER.warning("Gateway path %s is invalid: %s", path, exception)
         return False

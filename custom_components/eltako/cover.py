@@ -159,7 +159,8 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
                 or self._attr_current_cover_tilt_position is None
             ):
                 _LOGGER.warning(
-                    f"[cover {self.dev_id}] Missing 'current_position' or 'current_tilt_position' in latest_state.attributes. Defaulting to None."
+                    "[%s] Missing 'current_position' or 'current_tilt_position' in latest_state.attributes. Defaulting to None",
+                    self.dev_id,
                 )
 
             if latest_state.state == STATE_OPEN:
@@ -184,12 +185,12 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
                 self._attr_is_closed = False
             else:
                 _LOGGER.warning(
-                    f"[cover {self.dev_id}] Unknown state: {latest_state.state}"
+                    "[%s] Unknown state: %s", self.dev_id, latest_state.state
                 )
 
         except KeyError as e:
             _LOGGER.error(
-                f"[cover {self.dev_id}] KeyError while accessing attributes: {e}"
+                "[%s] KeyError while accessing attributes: %s", self.dev_id, e
             )
             self._attr_current_cover_position = None
             self._attr_current_cover_tilt_position = None
@@ -198,7 +199,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             self._attr_is_closed = None
         except Exception as e:
             _LOGGER.error(
-                f"[cover {self.dev_id}] Unexpected error in load_value_initially: {e}"
+                "[%s] Unexpected error in load_value_initially: %s", self.dev_id, e
             )
             self._attr_current_cover_position = None
             self._attr_current_cover_tilt_position = None
@@ -209,13 +210,14 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
 
         self.schedule_update_ha_state()
         _LOGGER.debug(
-            f"[cover {self.dev_id}] value initially loaded: ["
-            + f"is_opening: {self.is_opening}, "
-            + f"is_closing: {self.is_closing}, "
-            + f"is_closed: {self.is_closed}, "
-            + f"current_possition: {self._attr_current_cover_position}, "
-            + f"current_tilt_position: {self._attr_current_cover_tilt_position}, "
-            + f"state: {self.state}]"
+            "[%s] value initially loaded: [is_opening: %s, is_closing: %s, is_closed: %s, current_possition: %s, current_tilt_position: %s, state: %s]",
+            self.dev_id,
+            self.is_opening,
+            self.is_closing,
+            self.is_closed,
+            self._attr_current_cover_position,
+            self._attr_current_cover_tilt_position,
+            self.state,
         )
 
     def open_cover(self, **kwargs: Any) -> None:
@@ -233,9 +235,8 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.COVER,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -263,9 +264,8 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.COVER,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -332,9 +332,8 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.COVER,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -372,7 +371,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             return
 
         if self.dev_eep in [G5_3F_7F]:
-            _LOGGER.debug(f"[cover {self.dev_id}] G5_3F_7F - {decoded.__dict__}")
+            _LOGGER.debug("[%s] G5_3F_7F - %s", self.dev_id, decoded.__dict__)
 
             ## is received as response when button pushed (command was sent)
             ## this message is received directly when the cover starts to move
@@ -456,7 +455,13 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
                     self._attr_is_closing = False
 
             _LOGGER.debug(
-                f"[cover {self.dev_id}] state: {self.state}, opening: {self.is_opening}, closing: {self.is_closing}, closed: {self.is_closed}, position: {self._attr_current_cover_position}"
+                "[%s] state: %s, opening: %s, closing: %s, closed: %s, position: %s",
+                self.dev_id,
+                self.state,
+                self.is_opening,
+                self.is_closing,
+                self.is_closed,
+                self._attr_current_cover_position,
             )
 
             self.schedule_update_ha_state()

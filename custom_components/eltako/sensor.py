@@ -599,7 +599,7 @@ async def async_setup_entry(
                     # both are currently combined in illumination
 
             except Exception as e:
-                _LOGGER.warning("[%s] Could not load configuration", platform)
+                _LOGGER.warning("Could not load configuration")
                 _LOGGER.critical(e, exc_info=True)
 
     # add labels for buttons
@@ -647,9 +647,7 @@ async def async_setup_entry(
                     )
 
             except Exception as e:
-                _LOGGER.warning(
-                    "[%s] Could not load configuration", Platform.BINARY_SENSOR
-                )
+                _LOGGER.warning("Could not load configuration")
                 _LOGGER.critical(e, exc_info=True)
 
     # add id field for every device
@@ -744,13 +742,19 @@ class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
 
     def load_value_initially(self, latest_state: State):
         _LOGGER.debug(
-            f"[{self._attr_ha_platform} {self.dev_id}] eneity unique_id: {self.unique_id}"
+            "[%s] eneity unique_id: %s",
+            self.dev_id,
+            self.unique_id,
         )
         _LOGGER.debug(
-            f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}"
+            "[%s] latest state - state: %s",
+            self.dev_id,
+            latest_state.state,
         )
         _LOGGER.debug(
-            f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}"
+            "[%s] latest state - attributes: %s",
+            self.dev_id,
+            latest_state.attributes,
         )
         try:
             if "unknown" == latest_state.state:
@@ -794,7 +798,11 @@ class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
         self.schedule_update_ha_state()
 
         _LOGGER.debug(
-            f"[{self._attr_ha_platform} {self.dev_id} ({type(self).__name__})] value initially loaded: [native_value: {self.native_value}, state: {self.state}]"
+            "[%s (%s)] value initially loaded: [native_value: %s, state: %s]",
+            self.dev_id,
+            type(self).__name__,
+            self.native_value,
+            self.state,
         )
 
 
@@ -849,7 +857,7 @@ class EltakoVoltageSensor(EltakoSensor):
             decoded: A5_07_01 = self.dev_eep.decode_message(msg)
         except Exception as e:
             _LOGGER.warning(
-                "[Voltage Sensor %s] Could not decode message: %s", self.dev_id, str(e)
+                "[Voltage Sensor %s] Could not decode message: %s", self.dev_id, e
             )
             return
 
@@ -901,7 +909,7 @@ class EltakoMeterSensor(EltakoSensor):
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
             _LOGGER.warning(
-                "[Meter Sensor %s] Could not decode message: %s", self.dev_id, str(e)
+                "[Meter Sensor %s] Could not decode message: %s", self.dev_id, e
             )
             return
 
@@ -972,7 +980,7 @@ class EltakoWindowHandle(EltakoSensor):
             _LOGGER.warning(
                 "[Window Handle Sensor %s] Could not decode message: %s",
                 self.dev_id,
-                str(e),
+                e,
             )
             return
 
@@ -1013,7 +1021,7 @@ class EltakoWeatherStation(EltakoSensor):
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
             _LOGGER.warning(
-                "[Weather Station %s] Could not decode message: %s", self.dev_id, str(e)
+                "[Weather Station %s] Could not decode message: %s", self.dev_id, e
             )
             return
 
@@ -1101,7 +1109,7 @@ class EltakoTemperatureSensor(EltakoSensor):
             _LOGGER.warning(
                 "[Temperature Sensor %s] Could not decode message: %s",
                 self.dev_id,
-                str(e),
+                e,
             )
             return
 
@@ -1136,7 +1144,7 @@ class EltakoIlluminationSensor(EltakoSensor):
             _LOGGER.warning(
                 "[Illumination Sensor %s] Could not decode message: %s",
                 self.dev_id,
-                str(e),
+                e,
             )
             return
 
@@ -1171,7 +1179,7 @@ class EltakoBatteryVoltageSensor(EltakoSensor):
             _LOGGER.warning(
                 "[Battery Voltage Sensor %s] Could not decode message: %s",
                 self.dev_id,
-                str(e),
+                e,
             )
             return
 
@@ -1210,7 +1218,7 @@ class EltakoTargetTemperatureSensor(EltakoSensor):
             _LOGGER.warning(
                 "[Target Temperature Sensor %s] Could not decode message: %s",
                 self.dev_id,
-                str(e),
+                e,
             )
             return
 
@@ -1247,7 +1255,7 @@ class EltakoHumiditySensor(EltakoSensor):
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
             _LOGGER.warning(
-                "[Humidity Sensor %s] Could not decode message: %s", self.dev_id, str(e)
+                "[Humidity Sensor %s] Could not decode message: %s", self.dev_id, e
             )
             return
 
@@ -1297,7 +1305,7 @@ class EltakoAirQualitySensor(EltakoSensor):
         # self._attr_suggested_unit_of_measurement = voc_type.unit
 
         _LOGGER.debug(
-            f"entity_description: {self.entity_description}, voc_type: {voc_type}"
+            "entity_description: %s, voc_type: %s", self.entity_description, voc_type
         )
 
     def value_changed(self, msg: ESP2Message):
@@ -1308,7 +1316,7 @@ class EltakoAirQualitySensor(EltakoSensor):
             _LOGGER.warning(
                 "[Air Quality Sensor %s] Could not decode message: %s",
                 self.dev_id,
-                str(e),
+                e,
             )
             return
 
@@ -1519,12 +1527,16 @@ class EventListenerInfoField(EltakoSensor):
         self.listen_to_addresses.clear()
 
         _LOGGER.debug(
-            f"[{platform}] [{EventListenerInfoField.__name__}] [{b2s(dev_id[0])}] [{key}] Register event: {event_id}"
+            "[%s] [%s] [%s] Register event: %s",
+            EventListenerInfoField.__name__,
+            b2s(dev_id[0]),
+            key,
+            event_id,
         )
         self.hass.bus.async_listen(event_id, self.value_changed)
 
     def value_changed(self, event) -> None:
-        _LOGGER.debug(f"Received event: {event}")
+        _LOGGER.debug("Received event: %s", event)
         self.native_value = self.convert_event_function(event)
 
         self.schedule_update_ha_state()

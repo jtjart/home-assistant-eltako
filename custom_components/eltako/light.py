@@ -115,7 +115,11 @@ class AbstractLightEntity(EltakoEntity, LightEntity, RestoreEntity):
         self.schedule_update_ha_state()
 
         _LOGGER.debug(
-            f"[{Platform.LIGHT} {self.dev_id}] value initially loaded: [is_on: {self.is_on}, brightness: {self.brightness}, state: {self.state}]"
+            "[%s] value initially loaded: [is_on: %s, brightness: %s, state: %s]",
+            self.dev_id,
+            self.is_on,
+            self.brightness,
+            self.state,
         )
 
 
@@ -171,9 +175,8 @@ class EltakoDimmableLight(AbstractLightEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.LIGHT,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -210,9 +213,8 @@ class EltakoDimmableLight(AbstractLightEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.LIGHT,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -232,13 +234,11 @@ class EltakoDimmableLight(AbstractLightEntity):
             if msg.org == 0x07:
                 decoded: A5_38_08 = self.dev_eep.decode_message(msg)
             elif msg.org == 0x05:
-                _LOGGER.debug("[Dimmable Light] Ignore on/off message with org=0x05")
+                _LOGGER.debug("Ignore on/off message with org=0x05")
                 return
 
         except Exception as e:
-            _LOGGER.warning(
-                "[Dimmable Light] Could not decode message: %s %s", type(e), str(e)
-            )
+            _LOGGER.warning("Could not decode message: %s %s", type(e), str(e))
             return
 
         if self.dev_eep in [A5_38_08]:
@@ -266,9 +266,8 @@ class EltakoDimmableLight(AbstractLightEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Device EEP %s not supported.",
-                Platform.LIGHT,
-                str(self.dev_id),
+                "[%s] Device EEP %s not supported",
+                self.dev_id,
                 self.dev_eep.eep_string,
             )
 
@@ -321,9 +320,8 @@ class EltakoSwitchableLight(AbstractLightEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.LIGHT,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -359,9 +357,8 @@ class EltakoSwitchableLight(AbstractLightEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.LIGHT,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -376,9 +373,8 @@ class EltakoSwitchableLight(AbstractLightEntity):
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
             _LOGGER.warning(
-                "[%s %s] Could not decode message: %s",
-                Platform.LIGHT,
-                str(self.dev_id),
+                "[%s] Could not decode message: %s",
+                self.dev_id,
                 str(e),
             )
             return
@@ -389,8 +385,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Device EEP %s not supported.",
-                Platform.LIGHT,
-                str(self.dev_id),
+                "[%s] Device EEP %s not supported",
+                self.dev_id,
                 self.dev_eep.eep_string,
             )

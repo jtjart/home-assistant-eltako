@@ -56,7 +56,7 @@ def print_config_entry(config_entry: ConfigEntry) -> None:
 # relevant for higher than v.1.3.4: removed 'ESP2' from GATEWAY_DEFAULT_NAME which is still in OLD_GATEWAY_DEFAULT_NAME
 def migrate_old_gateway_descriptions(hass: HomeAssistant):
     _LOGGER.debug(
-        f"Provide new and old gateway descriptions/id for smooth version upgrades."
+        "Provide new and old gateway descriptions/id for smooth version upgrades"
     )
     migration_dict: dict = {}
     for key in hass.data[DATA_ELTAKO].keys():
@@ -64,14 +64,18 @@ def migrate_old_gateway_descriptions(hass: HomeAssistant):
         if GATEWAY_DEFAULT_NAME in key:
             old_key = key.replace(GATEWAY_DEFAULT_NAME, OLD_GATEWAY_DEFAULT_NAME)
             _LOGGER.info(
-                f"Support downwards compatibility => from new gatewy description '{key}' to old description '{old_key}'"
+                "Support downwards compatibility => from new gatewy description '%s' to old description '%s'",
+                key,
+                old_key,
             )
             migration_dict[old_key] = hass.data[DATA_ELTAKO][key]
             # del hass.data[DATA_ELTAKO][key]
         if OLD_GATEWAY_DEFAULT_NAME in key:
             new_key = key.replace(OLD_GATEWAY_DEFAULT_NAME, GATEWAY_DEFAULT_NAME)
             _LOGGER.info(
-                f"Migrate gatewy from old description '{key}' to new description '{new_key}'"
+                "Migrate gatewy from old description '%s' to new description '%s'",
+                key,
+                new_key,
             )
             migration_dict[new_key] = hass.data[DATA_ELTAKO][key]
     # prvide either new or old key in parallel
@@ -105,13 +109,13 @@ def get_device_config_for_gateway(
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up an Eltako gateway for the given entry."""
-    _LOGGER.info(f"Start gateway setup.")
+    _LOGGER.info("Start gateway setup")
     # print_config_entry(config_entry)
 
     # Check domain
     if config_entry.domain != DOMAIN:
         _LOGGER.warning(
-            f"Ooops, received configuration entry of wrong domain '%s' (expected: '')!",
+            "Ooops, received configuration entry of wrong domain '%s' (expected: '%s')",
             config_entry.domain,
             DOMAIN,
         )
@@ -128,7 +132,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     eltako_data = hass.data.setdefault(DATA_ELTAKO, {})
     eltako_data[ELTAKO_CONFIG] = config
     # print whole eltako configuration
-    _LOGGER.debug(f"config: {config}\n")
+    _LOGGER.debug("config: %s", config)
 
     # Migrage existing gateway configs / ESP2 was removed in the name
     migrate_old_gateway_descriptions(hass)
@@ -138,13 +142,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     # get base_id from user input
     if CONF_GATEWAY_DESCRIPTION not in config_entry.data.keys():
         _LOGGER.warning(
-            "Ooops, device information for gateway is not available. Try to delete and recreate the gateway."
+            "Ooops, device information for gateway is not available. Try to delete and recreate the gateway"
         )
         return
     gateway_description = config_entry.data[CONF_GATEWAY_DESCRIPTION]  # from user input
     if not ("(" in gateway_description and ")" in gateway_description):
         _LOGGER.warning(
-            "Ooops, no base id of gateway available. Try to delete and recreate the gateway."
+            "Ooops, no base id of gateway available. Try to delete and recreate the gateway"
         )
         return
     gateway_id = config_helpers.get_id_from_name(gateway_description)
@@ -155,15 +159,13 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     )
     if not gateway_config:
         _LOGGER.warning(
-            f"Ooops, no gateway configuration found in '/homeassistant/configuration.yaml'."
+            "Ooops, no gateway configuration found in '/homeassistant/configuration.yaml'"
         )
         return
 
     # get serial path info
     if CONF_SERIAL_PATH not in config_entry.data.keys():
-        _LOGGER.warning(
-            "Ooops, no information about serial path available for gateway."
-        )
+        _LOGGER.warning("Ooops, no information about serial path available for gateway")
         return
     gateway_serial_path = config_entry.data[CONF_SERIAL_PATH]
 
@@ -173,7 +175,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     )  # from configuration
     if gateway_device_type is None:
         _LOGGER.error(
-            f"USB device {gateway_config[CONF_DEVICE_TYPE]} is not supported!!!"
+            "USB device %s is not supported", gateway_config[CONF_DEVICE_TYPE]
         )
         return False
     if gateway_device_type == GatewayDeviceType.LAN:
@@ -186,7 +188,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         True  # GatewayDeviceType.is_transceiver(gateway_device_type) # should only be disabled for decentral gateways
     )
 
-    _LOGGER.info(f"Initializes Gateway Device '{gateway_description}'")
+    _LOGGER.info("Initializes Gateway Device '%s'", gateway_description)
     gateway_name = gateway_config.get(CONF_NAME, None)  # from configuration
     baud_rate = BAUD_RATE_DEVICE_TYPE_MAPPING[gateway_device_type]
     port = gateway_config.get(CONF_GATEWAY_PORT, 5100)
@@ -194,7 +196,12 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     gateway_base_id = AddressExpression.parse(gateway_config[CONF_BASE_ID])
     message_delay = gateway_config.get(CONF_GATEWAY_MESSAGE_DELAY, None)
     _LOGGER.debug(
-        f"id: {gateway_id}, device type: {gateway_device_type}, serial path: {gateway_serial_path}, baud rate: {baud_rate}, base id: {gateway_base_id}"
+        "id: %s, device type: %s, serial path: %s, baud rate: %s, base id: %s",
+        gateway_id,
+        gateway_device_type,
+        gateway_serial_path,
+        baud_rate,
+        gateway_base_id,
     )
     usb_gateway = EnOceanGateway(
         general_settings,

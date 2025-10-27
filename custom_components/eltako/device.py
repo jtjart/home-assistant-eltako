@@ -62,7 +62,7 @@ class EltakoEntity(Entity):
         self.entity_id = f"{self._attr_ha_platform}.{self._attr_unique_id}"
 
         _LOGGER.debug(
-            f"[{self._attr_ha_platform} {self.dev_id}] Added entity {self.dev_name} ({type(self).__name__})."
+            "[%s] Added entity %s (%s)", self.dev_id, self.dev_name, type(self).__name__
         )
 
     @classmethod
@@ -136,13 +136,12 @@ class EltakoEntity(Entity):
     def load_value_initially(self, latest_state: State):
         """This function is implemented in the concrete devices classes"""
         _LOGGER.warning(
-            f"[{self._attr_ha_platform} {self.dev_id}] DOES NOT HAVE AN IMPLEMENTATION FOR: load_value_initially()"
+            "[%s] DOES NOT HAVE AN IMPLEMENTATION FOR: load_value_initially()",
+            self.dev_id,
         )
+        _LOGGER.debug("[%s] latest state - state: %s", self.dev_id, latest_state.state)
         _LOGGER.debug(
-            f"[{self._attr_ha_platform} {self.dev_id}] latest state - state: {latest_state.state}"
-        )
-        _LOGGER.debug(
-            f"[{self._attr_ha_platform} {self.dev_id}] latest state - attributes: {latest_state.attributes}"
+            "[%s] latest state - attributes: %s", self.dev_id, latest_state.attributes
         )
 
     def validate_dev_id(self) -> bool:
@@ -234,7 +233,11 @@ def log_entities_to_be_added(entities: list[EltakoEntity], platform: Platform) -
         if e.dev_eep:
             temp_eep = f"eep: {e.dev_eep.eep_string}),"
         _LOGGER.debug(
-            f"[{platform} {e.dev_id}] Add entity {e.dev_name} (id: {e.dev_id},{temp_eep} gw: {e.gateway.dev_name}) to Home Assistant."
+            "Add entity %s (id: %s,%s gw: %s) to Home Assistant",
+            e.dev_name,
+            e.dev_id,
+            temp_eep,
+            e.gateway.dev_name,
         )
 
 
@@ -246,7 +249,10 @@ def get_entity_from_hass(
         if platform.domain == domain:
             for entity in platform.entities.values():
                 _LOGGER.debug(
-                    f"checking entity type: {type(entity)}, dev_eep: {entity.dev_eep.eep_string}, dev_id: {entity.dev_id}"
+                    "checking entity type: %s, dev_eep: %s, dev_id: %s",
+                    type(entity).__name__,
+                    entity.dev_eep.eep_string,
+                    entity.dev_id,
                 )
                 if entity.dev_id == dev_id:
                     return entity

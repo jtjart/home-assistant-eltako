@@ -70,7 +70,7 @@ async def async_setup_entry(
                 )
 
             except Exception as e:
-                _LOGGER.warning("[%s] Could not load configuration", platform)
+                _LOGGER.warning("Could not load configuration")
                 _LOGGER.critical(e, exc_info=True)
 
     validate_actuators_dev_and_sender_id(entities)
@@ -113,7 +113,10 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
         self.schedule_update_ha_state()
 
         _LOGGER.debug(
-            f"[{Platform.SWITCH} {str(self.dev_id)}] value initially loaded: [is_on: {self.is_on}, state: {self.state}]"
+            "[%s] value initially loaded: [is_on: %s, state: %s]",
+            self.dev_id,
+            self.is_on,
+            self.state,
         )
 
     def turn_on(self, **kwargs: Any) -> None:
@@ -142,9 +145,8 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.SWITCH,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -179,9 +181,8 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Sender EEP %s not supported.",
-                Platform.SWITCH,
-                str(self.dev_id),
+                "[%s] Sender EEP %s not supported",
+                self.dev_id,
                 self._sender_eep.eep_string,
             )
             return
@@ -196,10 +197,9 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
             decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
             _LOGGER.warning(
-                "[%s %s] Could not decode message: %s",
-                Platform.SWITCH,
-                str(self.dev_id),
-                str(e),
+                "[%s] Could not decode message: %s",
+                self.dev_id,
+                e,
             )
             return
 
@@ -228,8 +228,7 @@ class EltakoSwitch(EltakoEntity, SwitchEntity, RestoreEntity):
 
         else:
             _LOGGER.warning(
-                "[%s %s] Device EEP %s not supported.",
-                Platform.SWITCH,
-                str(self.dev_id),
+                "[%s] Device EEP %s not supported",
+                self.dev_id,
                 self.dev_eep.eep_string,
             )

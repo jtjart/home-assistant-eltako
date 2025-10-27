@@ -76,12 +76,12 @@ async def async_setup_entry(
                 cooling_switch = None
                 cooling_sender = None
                 if CONF_COOLING_MODE in config.keys():
-                    _LOGGER.debug("[Climate] Read cooling switch config")
+                    _LOGGER.debug("Read cooling switch config")
                     cooling_switch = config_helpers.get_device_conf(
                         entity_config.get(CONF_COOLING_MODE),
                         CONF_SENSOR[CONF_SWITCH_BUTTON],
                     )
-                    _LOGGER.debug("[Climate] Read cooling sender config")
+                    _LOGGER.debug("Read cooling sender config")
                     cooling_sender = config_helpers.get_device_conf(
                         entity_config.get(CONF_COOLING_MODE), CONF_SENDER
                     )
@@ -116,14 +116,15 @@ async def async_setup_entry(
                             ),
                         )
                         _LOGGER.debug(
-                            f"Subscribe for listening to cooling switch events: {event_id}"
+                            "Subscribe for listening to cooling switch events: %s",
+                            event_id,
                         )
                         hass.bus.async_listen(
                             event_id, climate_entity.async_handle_event
                         )
 
             except Exception as e:
-                _LOGGER.warning("[%s] Could not load configuration", platform)
+                _LOGGER.warning("Could not load configuration")
                 _LOGGER.critical(e, exc_info=True)
                 continue
 
@@ -245,7 +246,12 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         self.schedule_update_ha_state()
 
         _LOGGER.debug(
-            f"[climate {self.dev_id}] value initially loaded: [state: {self.state}, modes: [{self.hvac_modes}], current temp: {self.current_temperature}, target temp: {self.target_temperature}]"
+            "[%s] value initially loaded: [state: %s, modes: [%s], current temp: %s, target temp: %s]",
+            self.dev_id,
+            self.state,
+            self.hvac_modes,
+            self.current_temperature,
+            self.target_temperature,
         )
 
     async def _wrapped_update(self, *args) -> None:
@@ -275,7 +281,10 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         # _LOGGER.debug(f"[climate {self.dev_id}] Event received: {call.data}")
 
         _LOGGER.debug(
-            f"[climate {self.dev_id}] Cooling Switch {call.data['switch_address']} for button {hex(call.data['data'])} timestamp set."
+            "[climate %s] Cooling Switch %s for button %s timestamp set.",
+            self.dev_id,
+            call.data["switch_address"],
+            hex(call.data["data"]),
         )
         self.cooling_switch_last_signal_timestamp = time.time()
 
@@ -314,7 +323,8 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
             self._send_command(self._actuator_mode, new_target_temp)
         else:
             _LOGGER.debug(
-                f"[climate {self.dev_id}] default state of actor was not yet transferred."
+                "[%s] default state of actor was not yet transferred",
+                self.dev_id,
             )
 
     async def _async_send_command(
@@ -328,7 +338,10 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         address, _ = self._sender_id
         if self.current_temperature and self.target_temperature:
             _LOGGER.debug(
-                f"[climate {self.dev_id}] Send status update: current temp: {target_temp}, mode: {mode}"
+                "[%s] Send status update: current temp: %s, mode: %s",
+                self.dev_id,
+                target_temp,
+                mode,
             )
             msg = A5_10_06(
                 mode,
@@ -339,36 +352,35 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
             self.send_message(msg)
         else:
             _LOGGER.debug(
-                f"[climate {self.dev_id}] Either no current or target temperature is set. Waiting for status update."
+                "[%s] Either no current or target temperature is set. Waiting for status update",
+                self.dev_id,
             )
             # This is always the case when there was no sensor signal after HA started.
 
     def _send_set_normal_mode(self) -> None:
-        _LOGGER.debug(f"[climate {self.dev_id}] Send signal to set mode: Normal")
+        _LOGGER.debug("[%s] Send signal to set mode: Normal", self.dev_id)
         address, _ = self._sender_id
         self.send_message(RPSMessage(address, 0x30, b"\x70", True))
 
     def _send_mode_off(self) -> None:
-        _LOGGER.debug(f"[climate {self.dev_id}] Send signal to set mode: OFF")
+        _LOGGER.debug("[%s] Send signal to set mode: OFF", self.dev_id)
         address, _ = self._sender_id
         self.send_message(RPSMessage(address, 0x30, b"\x10", True))
 
     def _send_mode_night(self) -> None:
-        _LOGGER.debug(f"[climate {self.dev_id}] Send signal to set mode: Night")
+        _LOGGER.debug("[%s] Send signal to set mode: Night", self.dev_id)
         address, _ = self._sender_id
         self.send_message(RPSMessage(address, 0x30, b"\x50", True))
 
     def _send_mode_setback(self) -> None:
-        _LOGGER.debug(
-            f"[climate {self.dev_id}] Send signal to set mode: Temperature Setback"
-        )
+        _LOGGER.debug("[%s] Send signal to set mode: Temperature Setback", self.dev_id)
         address, _ = self._sender_id
         self.send_message(RPSMessage(address, 0x30, b"\x30", True))
 
     async def _async_send_mode_cooling(self) -> None:
         """fake physical switch and send cooling status."""
         if self.cooling_sender:
-            _LOGGER.debug(f"[climate {self.dev_id}] Send command for cooling")
+            _LOGGER.debug("[%s] Send command for cooling", self.dev_id)
             self.send_message(
                 RPSMessage(self.cooling_sender.id[0], 0x30, b"\x50", True)
             )
@@ -384,7 +396,7 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
             if (
                 time.time() - self.cooling_switch_last_signal_timestamp
             ) / 60.0 <= self.COOLING_SWITCH_SIGNAL_FREQUENCY_IN_MIN:
-                _LOGGER.debug(f"[climate {self.dev_id}] Cooling mode is active.")
+                _LOGGER.debug("[%s] Cooling mode is active", self.dev_id)
                 return HVACMode.COOL
 
         # is cooling signal timed out?
@@ -397,23 +409,23 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
             self._hvac_mode_from_heating = new_mode
             await self.async_set_hvac_mode(self._hvac_mode_from_heating)
 
-        _LOGGER.debug(f"[climate {self.dev_id}] {new_mode} mode is activated.")
+        _LOGGER.debug("[%s] {%s} mode is activated", self.dev_id, new_mode)
 
     def value_changed(self, msg: ESP2Message) -> None:
         """Update the internal state of this device."""
 
         climate_address, _ = self.dev_id
         if msg.address == climate_address:
-            _LOGGER.debug(
-                f"[climate {self.dev_id}] Change state triggered by actuator: {self.dev_id}"
-            )
+            _LOGGER.debug("Change state triggered by actuator: %s", self.dev_id)
             self.change_temperature_values(msg)
 
         if self.thermostat:
             thermostat_address, _ = self.thermostat.id
             if msg.address == thermostat_address:
                 _LOGGER.debug(
-                    f"[climate {self.dev_id}] Change state triggered by thermostat: {self.thermostat.id}"
+                    "[%s] Change state triggered by thermostat: %s",
+                    self.dev_id,
+                    self.thermostat.id,
                 )
                 self.change_temperature_values(msg)
 
@@ -428,9 +440,7 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
             if msg.org == 0x07:
                 decoded = self.dev_eep.decode_message(msg)
         except Exception as e:
-            _LOGGER.warning(
-                f"[climate {self.dev_id}] Could not decode message: %s", str(e)
-            )
+            _LOGGER.warning("[%s] Could not decode message: %s", self.dev_id, str(e))
             return
 
         if msg.org == 0x07 and self.dev_eep in [A5_10_06]:

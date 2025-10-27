@@ -176,8 +176,7 @@ async def async_setup_entry(
 
                 except Exception as e:
                     _LOGGER.warning(
-                        "[%s] Could not load configuration for platform_id %s",
-                        platform,
+                        "Could not load configuration for platform_id %s",
                         platform_id,
                     )
                     _LOGGER.critical(e, exc_info=True)
@@ -208,7 +207,10 @@ class AbstractBinarySensor(EltakoEntity, RestoreEntity, BinarySensorEntity):
         self.schedule_update_ha_state()
 
         _LOGGER.debug(
-            f"[{Platform.BINARY_SENSOR} {self.dev_id}] value initially loaded: [is_on: {self.is_on}, state: {self.state}]"
+            "[%s] value initially loaded: [is_on: %s, state: %s]",
+            self.dev_id,
+            self.is_on,
+            self.state,
         )
 
 
@@ -274,12 +276,11 @@ class EltakoBinarySensor(AbstractBinarySensor):
             # _LOGGER.debug("msg : %s, data: %s", type(msg), msg.data)
         except Exception as e:
             _LOGGER.warning(
-                "[%s %s] Could not decode message for eep %s does not fit to message type %s (org %s)",
-                Platform.BINARY_SENSOR,
-                str(self.dev_id),
+                "[%s] Could not decode message for eep %s does not fit to message type %s (org %s)",
+                self.dev_id,
                 self.dev_eep.eep_string,
                 type(msg).__name__,
-                str(msg.org),
+                msg.org,
             )
             return
 
@@ -335,9 +336,8 @@ class EltakoBinarySensor(AbstractBinarySensor):
             }
 
             _LOGGER.debug(
-                "[%s %s] Send event: %s, pressed_buttons: '%s'",
-                Platform.BINARY_SENSOR,
-                str(self.dev_id),
+                "[%s] Send event: %s, pressed_buttons: '%s'",
+                self.dev_id,
                 event_id,
                 json.dumps(pressed_buttons),
             )
@@ -361,9 +361,8 @@ class EltakoBinarySensor(AbstractBinarySensor):
                 "rocker_second_action": decoded.rocker_second_action,
             }
             _LOGGER.debug(
-                "[%s %s] Send event: %s, pressed_buttons: '%s'",
-                Platform.BINARY_SENSOR,
-                str(self.dev_id),
+                "[%s] Send event: %s, pressed_buttons: '%s'",
+                self.dev_id,
                 event_id,
                 json.dumps(pressed_buttons),
             )
@@ -393,11 +392,10 @@ class EltakoBinarySensor(AbstractBinarySensor):
                 "pressed": decoded.button_pushed,
             }
             _LOGGER.debug(
-                "[%s %s] Send event: %s, pushed down: %s",
-                Platform.BINARY_SENSOR,
-                str(self.dev_id),
+                "[%s] Send event: %s, pushed down: %s",
+                self.dev_id,
                 event_id,
-                str(decoded.button_pushed),
+                decoded.button_pushed,
             )
             self.hass.bus.fire(event_id, event_data)
 
@@ -483,9 +481,8 @@ class EltakoBinarySensor(AbstractBinarySensor):
 
         else:
             _LOGGER.warning(
-                "[%s %s] EEP %s not found for data processing.",
-                Platform.BINARY_SENSOR,
-                str(self.dev_id),
+                "[%s] EEP %s not found for data processing",
+                self.dev_id,
                 self.dev_eep.eep_string,
             )
             return
@@ -493,7 +490,7 @@ class EltakoBinarySensor(AbstractBinarySensor):
         self.schedule_update_ha_state()
 
         if self.is_on:
-            _LOGGER.debug("Fire event for binary sensor.")
+            _LOGGER.debug("Fire event for binary sensor")
             switch_address = config_helpers.format_address((msg.address, None))
             event_id = config_helpers.get_bus_event_type(
                 self.gateway.base_id,
@@ -549,10 +546,9 @@ class GatewayConnectionState(AbstractBinarySensor):
     def value_changed(self, connected: bool) -> None:
         """Update the current value."""
         _LOGGER.debug(
-            "[%s] [Gateway Id %s] connected %s",
-            Platform.BINARY_SENSOR,
-            str(self.gateway.dev_id),
-            str(connected),
+            "[Gateway Id %s] connected %s",
+            self.gateway.dev_id,
+            connected,
         )
 
         self._attr_is_on = connected
