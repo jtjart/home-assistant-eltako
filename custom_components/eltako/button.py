@@ -79,7 +79,7 @@ async def async_setup_entry(
                                 entity_config, CONF_SENDER
                             )
 
-                            if sender_config.eep in EEP_WITH_TEACH_IN_BUTTONS.keys():
+                            if sender_config.eep in EEP_WITH_TEACH_IN_BUTTONS:
                                 entities.append(
                                     TeachInButton(
                                         platform,
@@ -136,10 +136,7 @@ class TeachInButton(AbstractButton):
         super().__init__(platform, gateway, dev_id, _dev_name, dev_eep)
 
     async def async_press(self) -> None:
-        """
-        Handle the button press.
-        Send teach-in command
-        """
+        """Handle the button press and send teach-in command."""
 
         controller_address, _ = self.sender_id
         msg = Regular4BSMessage(
@@ -152,7 +149,7 @@ class TeachInButton(AbstractButton):
 
 
 class GatewayReconnectButton(AbstractButton):
-    """Button for reconnecting serial bus"""
+    """Button for reconnecting serial bus."""
 
     def __init__(self, platform: str, gateway: EnOceanGateway):
         self.entity_description = ButtonEntityDescription(
@@ -176,5 +173,5 @@ class GatewayReconnectButton(AbstractButton):
         )
 
     async def async_press(self) -> None:
-        """Reconnect serial bus"""
+        """Reconnect serial bus."""
         self.gateway.reconnect()

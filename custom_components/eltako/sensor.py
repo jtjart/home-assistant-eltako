@@ -757,36 +757,27 @@ class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
             latest_state.attributes,
         )
         try:
-            if "unknown" == latest_state.state:
+            if latest_state.state == "unknown":
                 self._attr_is_on = None
-            else:
-                if latest_state.attributes.get("state_class", None) == "measurement":
-                    if (
-                        latest_state.state.count(".") + latest_state.state.count(",")
-                        == 1
-                    ):
-                        self._attr_native_value = float(latest_state.state)
-                    elif (
-                        latest_state.state.count(".") == 0
-                        and latest_state.state.count(",") == 0
-                    ):
-                        self._attr_native_value = int(latest_state.state)
-                    else:
-                        self._attr_native_value = None
-
+            elif latest_state.attributes.get("state_class", None) == "measurement":
+                if latest_state.state.count(".") + latest_state.state.count(",") == 1:
+                    self._attr_native_value = float(latest_state.state)
                 elif (
-                    latest_state.attributes.get("state_class", None)
-                    == "total_increasing"
+                    latest_state.state.count(".") == 0
+                    and latest_state.state.count(",") == 0
                 ):
                     self._attr_native_value = int(latest_state.state)
+                else:
+                    self._attr_native_value = None
 
-                elif (
-                    latest_state.attributes.get("device_class", None) == "device_class"
-                ):
-                    # e.g.: 2024-02-12T23:32:44+00:00
-                    self._attr_native_value = datetime.strptime(
-                        latest_state.state, "%Y-%m-%dT%H:%M:%S%z:%f"
-                    )
+            elif latest_state.attributes.get("state_class", None) == "total_increasing":
+                self._attr_native_value = int(latest_state.state)
+
+            elif latest_state.attributes.get("device_class", None) == "device_class":
+                # e.g.: 2024-02-12T23:32:44+00:00
+                self._attr_native_value = datetime.strptime(
+                    latest_state.state, "%Y-%m-%dT%H:%M:%S%z:%f"
+                )
 
         except Exception as e:
             if hasattr(self, "_attr_is_on"):
@@ -807,7 +798,7 @@ class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
 
 
 class EltakoPirSensor(EltakoSensor):
-    """Occupancy Sensor"""
+    """Occupancy Sensor."""
 
     def __init__(
         self,
@@ -837,7 +828,7 @@ class EltakoPirSensor(EltakoSensor):
 
 
 class EltakoVoltageSensor(EltakoSensor):
-    """Voltage Sensor"""
+    """Voltage Sensor."""
 
     def __init__(
         self,
@@ -897,8 +888,7 @@ class EltakoMeterSensor(EltakoSensor):
         """Return the default name for the sensor."""
         if self._tariff_in_name:
             return f"{self.entity_description.name} (Tariff {self._tariff + 1})"
-        else:
-            return f"{self.entity_description.name}"
+        return f"{self.entity_description.name}"
 
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor.
@@ -1119,7 +1109,7 @@ class EltakoTemperatureSensor(EltakoSensor):
 
 
 class EltakoIlluminationSensor(EltakoSensor):
-    """Brightness sensor"""
+    """Brightness sensor."""
 
     def __init__(
         self,
@@ -1327,7 +1317,7 @@ class EltakoAirQualitySensor(EltakoSensor):
 
 
 class GatewayLastReceivedMessage(EltakoSensor):
-    """Protocols last time when message received"""
+    """Protocols last time when message received."""
 
     def __init__(self, platform: str, gateway: EnOceanGateway):
         super().__init__(
@@ -1374,7 +1364,7 @@ class GatewayLastReceivedMessage(EltakoSensor):
 
 
 class GatewayReceivedMessagesInActiveSession(EltakoSensor):
-    """Protocols amount of messages per session"""
+    """Protocols amount of messages per session."""
 
     def __init__(self, platform: str, gateway: EnOceanGateway):
         super().__init__(
@@ -1423,7 +1413,7 @@ class GatewayReceivedMessagesInActiveSession(EltakoSensor):
 
 
 class StaticInfoField(EltakoSensor):
-    """Key value fields for gateway information"""
+    """Key value fields for gateway information."""
 
     def __init__(
         self,
@@ -1457,7 +1447,7 @@ class StaticInfoField(EltakoSensor):
 
 
 class GatewayInfoField(StaticInfoField):
-    """Key value fields for gateway information"""
+    """Key value fields for gateway information."""
 
     def __init__(
         self,
@@ -1491,7 +1481,7 @@ class GatewayInfoField(StaticInfoField):
 
 
 class EventListenerInfoField(EltakoSensor):
-    """Key value fields for gateway information"""
+    """Key value fields for gateway information."""
 
     def __init__(
         self,

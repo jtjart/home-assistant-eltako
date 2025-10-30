@@ -96,11 +96,11 @@ async def async_setup_entry(
 class AbstractLightEntity(EltakoEntity, LightEntity, RestoreEntity):
     def load_value_initially(self, latest_state: State):
         try:
-            if "unknown" == latest_state.state:
+            if latest_state.state == "unknown":
                 self._attr_is_on = None
             else:
                 if latest_state.state in ["on", "off"]:
-                    self._attr_is_on = "on" == latest_state.state
+                    self._attr_is_on = latest_state.state == "on"
                 else:
                     self._attr_is_on = None
 

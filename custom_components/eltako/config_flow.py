@@ -109,7 +109,7 @@ class EltakoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             }
 
         # add manually added serial paths and ip addresses from configuration
-        for g_id in g_list_dict.keys():
+        for g_id in g_list_dict:
             g_c = config_helpers.find_gateway_config_by_id(config, g_id)
             if CONF_SERIAL_PATH in g_c:
                 serial_paths.append(g_c[CONF_SERIAL_PATH])
@@ -189,22 +189,21 @@ class EltakoFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         # check ip address for esp3 over tcp
         if GatewayDeviceType.LAN in gateway_selection:
             try:
-                ip = ipaddress.ip_address(serial_path)
-                return True
+                ipaddress.ip_address(serial_path)
             except Exception:
                 return False
-        # check serial ports / usb
-        else:
-            path_is_valid = await self.hass.async_add_executor_job(
-                gateway.validate_path, serial_path, baud_rate
-            )
-            _LOGGER.debug(
-                "serial_path: %s, validated with baud rate %d is %s",
-                serial_path,
-                baud_rate,
-                path_is_valid,
-            )
+            return True
 
+        # check serial ports / usb
+        path_is_valid = await self.hass.async_add_executor_job(
+            gateway.validate_path, serial_path, baud_rate
+        )
+        _LOGGER.debug(
+            "serial_path: %s, validated with baud rate %d is %s",
+            serial_path,
+            baud_rate,
+            path_is_valid,
+        )
         return path_is_valid
 
     def create_eltako_entry(self, user_input):

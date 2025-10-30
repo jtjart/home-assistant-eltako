@@ -75,7 +75,7 @@ async def async_setup_entry(
 
                 cooling_switch = None
                 cooling_sender = None
-                if CONF_COOLING_MODE in config.keys():
+                if CONF_COOLING_MODE in config:
                     _LOGGER.debug("Read cooling switch config")
                     cooling_switch = config_helpers.get_device_conf(
                         entity_config.get(CONF_COOLING_MODE),
@@ -372,7 +372,7 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         self.send_message(RPSMessage(address, 0x30, b"\x30", True))
 
     async def _async_send_mode_cooling(self) -> None:
-        """fake physical switch and send cooling status."""
+        """Fake physical switch and send cooling status."""
         if self.cooling_sender:
             _LOGGER.debug("[%s] Send command for cooling", self.dev_id)
             self.send_message(
@@ -385,12 +385,11 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
             return self._hvac_mode_from_heating
 
         # does cooling signal stays within the time range?
-        else:
-            if (
-                time.time() - self.cooling_switch_last_signal_timestamp
-            ) / 60.0 <= self.COOLING_SWITCH_SIGNAL_FREQUENCY_IN_MIN:
-                _LOGGER.debug("[%s] Cooling mode is active", self.dev_id)
-                return HVACMode.COOL
+        if (
+            time.time() - self.cooling_switch_last_signal_timestamp
+        ) / 60.0 <= self.COOLING_SWITCH_SIGNAL_FREQUENCY_IN_MIN:
+            _LOGGER.debug("[%s] Cooling mode is active", self.dev_id)
+            return HVACMode.COOL
 
         # is cooling signal timed out?
         return HVACMode.HEAT
@@ -441,9 +440,10 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
 
             if decoded.mode == A5_10_06.Heater_Mode.OFF:
                 self._attr_hvac_mode = HVACMode.OFF
-            elif decoded.mode == A5_10_06.Heater_Mode.NORMAL:
-                self._attr_hvac_mode = self._hvac_mode_from_heating
-            elif decoded.mode == A5_10_06.Heater_Mode.STAND_BY_2_DEGREES:
+            elif decoded.mode in (
+                A5_10_06.Heater_Mode.NORMAL,
+                A5_10_06.Heater_Mode.STAND_BY_2_DEGREES,
+            ):
                 self._attr_hvac_mode = self._hvac_mode_from_heating
 
             if decoded.mode != A5_10_06.Heater_Mode.OFF:

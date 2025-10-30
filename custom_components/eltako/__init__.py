@@ -88,7 +88,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     general_settings = config_helpers.get_general_settings_from_configuration(hass)
     # Initialise the gateway
     # get base_id from user input
-    if CONF_GATEWAY_DESCRIPTION not in config_entry.data.keys():
+    if CONF_GATEWAY_DESCRIPTION not in config_entry.data:
         _LOGGER.warning(
             "Ooops, device information for gateway is not available. Try to delete and recreate the gateway"
         )
@@ -112,7 +112,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         return
 
     # get serial path info
-    if CONF_SERIAL_PATH not in config_entry.data.keys():
+    if CONF_SERIAL_PATH not in config_entry.data:
         _LOGGER.warning("Ooops, no information about serial path available for gateway")
         return
     gateway_serial_path = config_entry.data[CONF_SERIAL_PATH]

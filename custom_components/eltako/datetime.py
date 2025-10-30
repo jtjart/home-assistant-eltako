@@ -46,7 +46,7 @@ async def async_setup_entry(
 
 
 class GatewayLastReceivedMessage(EltakoEntity, DateTimeEntity):
-    """Protocols last time when message received"""
+    """Protocols last time when message received."""
 
     def __init__(self, platform: str, gateway: EnOceanGateway):
         self.entity_description = EntityDescription(
@@ -61,7 +61,7 @@ class GatewayLastReceivedMessage(EltakoEntity, DateTimeEntity):
 
     def load_value_initially(self, latest_state: State):
         try:
-            if "unknown" == latest_state.state:
+            if latest_state.state == "unknown":
                 self._attr_native_value = None
             else:
                 # e.g.: 2024-02-12T23:32:44+00:00

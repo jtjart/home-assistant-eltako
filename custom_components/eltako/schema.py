@@ -132,7 +132,7 @@ class EltakoPlatformSchema(ABC):
 
 
 class GeneralSettings(EltakoPlatformSchema):
-    """Voluptuous schema for general settings of this integration"""
+    """Voluptuous schema for general settings of this integration."""
 
     PLATFORM = CONF_GERNERAL_SETTINGS
 
@@ -382,7 +382,7 @@ class ClimateSchema(EltakoPlatformSchema):
 
 
 class GatewaySchema(EltakoPlatformSchema):
-    """Voluptuous schema for bus gateway"""
+    """Voluptuous schema for bus gateway."""
 
     PLATFORM = CONF_GATEWAY
 

@@ -470,7 +470,8 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
 
         if tilt_position == self._attr_current_cover_tilt_position:
             return
-        elif tilt_position > self._attr_current_cover_tilt_position:
+
+        if tilt_position > self._attr_current_cover_tilt_position:
             direction = "up"
             sleeptime = min(
                 (

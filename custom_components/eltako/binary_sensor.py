@@ -192,13 +192,12 @@ async def async_setup_entry(
 class AbstractBinarySensor(EltakoEntity, RestoreEntity, BinarySensorEntity):
     def load_value_initially(self, latest_state: State):
         try:
-            if "unknown" == latest_state.state:
+            if latest_state.state == "unknown":
                 self._attr_is_on = None
+            elif latest_state.state in ["on", "off"]:
+                self._attr_is_on = latest_state.state == "on"
             else:
-                if latest_state.state in ["on", "off"]:
-                    self._attr_is_on = "on" == latest_state.state
-                else:
-                    self._attr_is_on = None
+                self._attr_is_on = None
 
         except Exception as e:
             self._attr_is_on = None
@@ -500,7 +499,7 @@ class EltakoBinarySensor(AbstractBinarySensor):
 
 
 class GatewayConnectionState(AbstractBinarySensor):
-    """Protocols last time when message received"""
+    """Protocols last time when message received."""
 
     def __init__(self, platform: str, gateway: EnOceanGateway):
         key = "Gateway_Connection_State"

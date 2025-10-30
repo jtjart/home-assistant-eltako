@@ -188,7 +188,7 @@ class EltakoEntity(Entity):
 
     @property
     def unique_id(self) -> str:
-        """Return the unique id of device"""
+        """Return the unique id of device."""
         return EltakoEntity._get_identifier(
             self.gateway, self.dev_id, self.description_key
         )

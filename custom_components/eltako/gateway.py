@@ -140,7 +140,7 @@ class EnOceanGateway:
             )
 
     def process_messages(self, data=None):
-        """Received message from bus in HA loop. (Actions needs to run outside bus thread!)"""
+        """Received message from bus in HA loop (Actions needs to run outside bus thread!)."""
         self._fire_received_message_count_event()
         self._fire_last_message_received_event()
 
@@ -199,7 +199,7 @@ class EnOceanGateway:
     ) -> bool:
         if GatewayDeviceType.is_transceiver(self.dev_type):
             return self.sender_id_validation_by_transmitter(sender_id, device_name)
-        elif GatewayDeviceType.is_bus_gateway(self.dev_type):
+        if GatewayDeviceType.is_bus_gateway(self.dev_type):
             return self.sender_id_validation_by_bus_gateway(sender_id, device_name)
         return False
 
@@ -223,14 +223,14 @@ class EnOceanGateway:
     def validate_dev_id(self, dev_id: AddressExpression, device_name: str = "") -> bool:
         if GatewayDeviceType.is_transceiver(self.dev_type):
             return self.dev_id_validation_by_transmitter(dev_id, device_name)
-        elif GatewayDeviceType.is_bus_gateway(self.dev_type):
+        if GatewayDeviceType.is_bus_gateway(self.dev_type):
             return self.dev_id_validation_by_bus_gateway(dev_id, device_name)
         return False
 
     def dev_id_validation_by_transmitter(
         self, dev_id: AddressExpression, device_name: str = ""
     ) -> bool:
-        result = 0xFF == dev_id[0][0]
+        result = dev_id[0][0] == 0xFF
         if not result:
             _LOGGER.warning(
                 "%s (%s): Maybe have wrong device id configured!", device_name, dev_id
@@ -487,7 +487,7 @@ def validate_path(path: str, baud_rate: int):
     """Return True if the provided path points to a valid serial port, False otherwise."""
     try:
         serial.serial_for_url(path, baud_rate, timeout=0.1)
-        return True
     except serial.SerialException as exception:
         _LOGGER.warning("Gateway path %s is invalid: %s", path, exception)
         return False
+    return True

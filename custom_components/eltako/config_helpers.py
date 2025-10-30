@@ -82,7 +82,7 @@ def get_device_conf(
     config: ConfigType, key: str, extra_keys: list[str] = []
 ) -> DeviceConf:
     if config is not None:
-        if key in config.keys():
+        if key in config:
             return DeviceConf(config.get(key), extra_keys)
     return None
 
@@ -109,7 +109,7 @@ async def async_get_gateway_config(
             and CONF_DEVICE_TYPE in config[CONF_GATEWAY]
         ):
             return config[CONF_GATEWAY]
-        elif (
+        if (
             len(config[CONF_GATEWAY]) > 0
             and CONF_DEVICE_TYPE in config[CONF_GATEWAY][0]
         ):
@@ -176,8 +176,7 @@ async def async_get_home_assistant_config(
         _LOGGER.warning("No 'eltako:' key found in configuration.yaml")
         # generate defaults
         return CONFIG_SCHEMA({DOMAIN: {}})[DOMAIN]
-    else:
-        return _conf[DOMAIN]
+    return _conf[DOMAIN]
 
 
 def get_device_config(config: dict, id: int) -> dict:
@@ -186,8 +185,7 @@ def get_device_config(config: dict, id: int) -> dict:
         if g[CONF_ID] == id:
             if CONF_DEVICES in g:
                 return g[CONF_DEVICES]
-            else:
-                return {}
+            return {}
     return None
 
 
@@ -259,8 +257,7 @@ def get_device_name(
 ) -> str:
     if general_config[CONF_SHOW_DEV_ID_IN_DEV_NAME]:
         return f"{dev_name} ({format_address(dev_id)})"
-    else:
-        return dev_name
+    return dev_name
 
 
 def get_id_from_name(dev_name: str) -> AddressExpression:
