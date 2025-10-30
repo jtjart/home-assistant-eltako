@@ -25,8 +25,6 @@ from .const import (
     DATA_ENTITIES,
     DOMAIN,
     ELTAKO_CONFIG,
-    GATEWAY_DEFAULT_NAME,
-    OLD_GATEWAY_DEFAULT_NAME,
     PLATFORMS,
     GatewayDeviceType,
 )
@@ -41,67 +39,21 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
-def print_config_entry(config_entry: ConfigEntry) -> None:
-    _LOGGER.debug("ConfigEntry")
-    _LOGGER.debug("- tilte: %s", config_entry.title)
-    _LOGGER.debug("- domain: %s", config_entry.domain)
-    _LOGGER.debug("- unique_id: %s", config_entry.unique_id)
-    _LOGGER.debug("- version: %s", config_entry.version)
-    _LOGGER.debug("- entry_id: %s", config_entry.entry_id)
-    _LOGGER.debug("- state: %s", config_entry.state)
-    for k in config_entry.data.keys():
-        _LOGGER.debug("- data %s - %s", k, config_entry.data.get(k, ""))
-
-
-# relevant for higher than v.1.3.4: removed 'ESP2' from GATEWAY_DEFAULT_NAME which is still in OLD_GATEWAY_DEFAULT_NAME
-def migrate_old_gateway_descriptions(hass: HomeAssistant):
-    _LOGGER.debug(
-        "Provide new and old gateway descriptions/id for smooth version upgrades"
-    )
-    migration_dict: dict = {}
-    for key in hass.data[DATA_ELTAKO].keys():
-        # _LOGGER.debug(f"Check description: {key}")
-        if GATEWAY_DEFAULT_NAME in key:
-            old_key = key.replace(GATEWAY_DEFAULT_NAME, OLD_GATEWAY_DEFAULT_NAME)
-            _LOGGER.info(
-                "Support downwards compatibility => from new gatewy description '%s' to old description '%s'",
-                key,
-                old_key,
-            )
-            migration_dict[old_key] = hass.data[DATA_ELTAKO][key]
-            # del hass.data[DATA_ELTAKO][key]
-        if OLD_GATEWAY_DEFAULT_NAME in key:
-            new_key = key.replace(OLD_GATEWAY_DEFAULT_NAME, GATEWAY_DEFAULT_NAME)
-            _LOGGER.info(
-                "Migrate gatewy from old description '%s' to new description '%s'",
-                key,
-                new_key,
-            )
-            migration_dict[new_key] = hass.data[DATA_ELTAKO][key]
-    # prvide either new or old key in parallel
-    for key in migration_dict:
-        hass.data[DATA_ELTAKO][key] = migration_dict[key]
-
-
 def get_gateway_from_hass(
     hass: HomeAssistant, config_entry: ConfigEntry
 ) -> EnOceanGateway:
-    # Migrage existing gateway configs / ESP2 was removed in the name
-    migrate_old_gateway_descriptions(hass)
-
+    """Retrieve the EnOcean gateway instance from Home Assistant data."""
     return hass.data[DATA_ELTAKO][config_entry.data[CONF_GATEWAY_DESCRIPTION]]
 
 
-def set_gateway_to_hass(hass: HomeAssistant, gateway_enity: EnOceanGateway) -> None:
-    # Migrage existing gateway configs / ESP2 was removed in the name
-    migrate_old_gateway_descriptions(hass)
-
-    hass.data[DATA_ELTAKO][gateway_enity.dev_name] = gateway_enity
+def _set_gateway_to_hass(hass: HomeAssistant, gateway_entity: EnOceanGateway) -> None:
+    hass.data[DATA_ELTAKO][gateway_entity.dev_name] = gateway_entity
 
 
 def get_device_config_for_gateway(
-    hass: HomeAssistant, config_entry: ConfigEntry, gateway: EnOceanGateway
+    hass: HomeAssistant, gateway: EnOceanGateway
 ) -> ConfigType:
+    """Retrieve the device configuration for a specific EnOcean gateway."""
     return config_helpers.get_device_config(
         hass.data[DATA_ELTAKO][ELTAKO_CONFIG], gateway.dev_id
     )
@@ -110,7 +62,6 @@ def get_device_config_for_gateway(
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up an Eltako gateway for the given entry."""
     _LOGGER.info("Start gateway setup")
-    # print_config_entry(config_entry)
 
     # Check domain
     if config_entry.domain != DOMAIN:
@@ -133,9 +84,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     eltako_data[ELTAKO_CONFIG] = config
     # print whole eltako configuration
     _LOGGER.debug("config: %s", config)
-
-    # Migrage existing gateway configs / ESP2 was removed in the name
-    migrate_old_gateway_descriptions(hass)
 
     general_settings = config_helpers.get_general_settings_from_configuration(hass)
     # Initialise the gateway
@@ -219,7 +167,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     )
 
     await usb_gateway.async_setup()
-    set_gateway_to_hass(hass, usb_gateway)
+    _set_gateway_to_hass(hass, usb_gateway)
 
     hass.data[DATA_ELTAKO][DATA_ENTITIES] = {}
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)

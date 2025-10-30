@@ -134,7 +134,7 @@ class EltakoEntity(Entity):
                     self.load_value_initially(latest_state)
 
     def load_value_initially(self, latest_state: State):
-        """This function is implemented in the concrete devices classes"""
+        """This function is implemented in the concrete devices classes."""
         _LOGGER.warning(
             "[%s] DOES NOT HAVE AN IMPLEMENTATION FOR: load_value_initially()",
             self.dev_id,

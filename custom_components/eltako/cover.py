@@ -55,7 +55,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the Eltako cover platform."""
     gateway: EnOceanGateway = get_gateway_from_hass(hass, config_entry)
-    config: ConfigType = get_device_config_for_gateway(hass, config_entry, gateway)
+    config: ConfigType = get_device_config_for_gateway(hass, gateway)
 
     entities: list[EltakoEntity] = []
 
