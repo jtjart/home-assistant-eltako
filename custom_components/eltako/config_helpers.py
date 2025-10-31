@@ -40,7 +40,10 @@ DEFAULT_GENERAL_SETTINGS = {
 class DeviceConf(dict):
     """Object representation of config."""
 
-    def __init__(self, config: ConfigType, extra_keys: list[str] = []):
+    def __init__(self, config: ConfigType, extra_keys: list[str] | None = None) -> None:
+        if extra_keys is None:
+            extra_keys = []
+
         # merge everything into dict
         self.update(config)
 
@@ -78,12 +81,10 @@ class DeviceConf(dict):
         return super().get(key, default)
 
 
-def get_device_conf(
-    config: ConfigType, key: str, extra_keys: list[str] = []
-) -> DeviceConf:
+def get_device_conf(config: ConfigType, key: str) -> DeviceConf:
     if config is not None:
         if key in config:
-            return DeviceConf(config.get(key), extra_keys)
+            return DeviceConf(config.get(key))
     return None
 
 
@@ -193,15 +194,14 @@ async def async_get_list_of_gateway_descriptions(
     hass: HomeAssistant,
     CONFIG_SCHEMA: dict,
     get_integration_config=async_integration_yaml_config,
-    filter_out: list[str] = [],
 ) -> dict:
     config = await async_get_home_assistant_config(
         hass, CONFIG_SCHEMA, get_integration_config
     )
-    return get_list_of_gateway_descriptions(config, filter_out)
+    return get_list_of_gateway_descriptions(config)
 
 
-def get_list_of_gateway_descriptions(config: dict, filter_out: list[str] = []) -> dict:
+def get_list_of_gateway_descriptions(config: dict) -> dict:
     """Compiles a list of all gateways in config."""
     result = {}
     if CONF_GATEWAY in config:
@@ -210,7 +210,7 @@ def get_list_of_gateway_descriptions(config: dict, filter_out: list[str] = []) -
             g_name = g.get(CONF_NAME, None)
             g_device_type = g[CONF_DEVICE_TYPE]
             g_base_id = g.get(CONF_BASE_ID, None)
-            if g_base_id and g_base_id not in filter_out:
+            if g_base_id:
                 result[g_id] = get_gateway_name(
                     g_name, g_device_type, g_id, AddressExpression.parse(g_base_id)
                 )
@@ -234,10 +234,7 @@ def config_check_gateway(config: dict) -> bool:
 
 def compare_enocean_ids(id1: bytes, id2: bytes, len=3) -> bool:
     """Compares two bytes arrays. len specifies the length to be checked."""
-    for i in range(0, len):
-        if id1[i] != id2[i]:
-            return False
-    return True
+    return all(id1[i] == id2[i] for i in range(len))
 
 
 def get_gateway_name(
@@ -268,7 +265,7 @@ def get_bus_event_type(
     gateway_id: int,
     function_id: str,
     source_id: AddressExpression = None,
-    data: str = None,
+    data: str | None = None,
 ) -> str:
     event_id = f"{DOMAIN}.gw_{gateway_id}.{function_id}"
 

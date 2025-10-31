@@ -71,9 +71,9 @@ class EnOceanGateway:
         base_id: AddressExpression,
         dev_name: str,
         auto_reconnect: bool = True,
-        message_delay: float = None,
+        message_delay: float = 0.01,
         config_entry: ConfigEntry = None,
-    ):
+    ) -> None:
         """Initialize the Eltako gateway."""
 
         self._loop = asyncio.get_event_loop()

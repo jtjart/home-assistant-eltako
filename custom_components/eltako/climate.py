@@ -180,7 +180,7 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         thermostat: DeviceConf,
         cooling_switch: DeviceConf,
         cooling_sender: DeviceConf,
-    ):
+    ) -> None:
         """Initialize the Eltako heating and cooling source."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep)
         self._on_state = False
@@ -308,7 +308,7 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
     async def async_set_temperature(self, **kwargs) -> None:
         """Set new target temperature."""
 
-        if self._actuator_mode != None and self.current_temperature > 0:
+        if self._actuator_mode is not None and self.current_temperature > 0:
             new_target_temp = kwargs["temperature"]
 
             if self._actuator_mode == A5_10_06.Heater_Mode.OFF:

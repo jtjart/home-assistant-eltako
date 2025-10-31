@@ -38,8 +38,8 @@ class EltakoEntity(Entity):
         dev_id: AddressExpression,
         dev_name: str = "Device",
         dev_eep: EEP = None,
-        description_key: str = None,
-    ):
+        description_key: str | None = None,
+    ) -> None:
         """Initialize the device."""
         self._attr_has_entity_name = True
         self._attr_should_poll = True
@@ -55,9 +55,9 @@ class EltakoEntity(Entity):
         self._attr_dev_eep = dev_eep
         self.listen_to_addresses = []
         self.listen_to_addresses.append(self.dev_id[0])
-        self.description_key = description_key
-        self._attr_unique_id = EltakoEntity._get_identifier(
-            self.gateway, self.dev_id, self._get_description_key()
+        self.description_key = self._set_description_key(description_key)
+        self._attr_unique_id = self._get_identifier(
+            self.gateway, self.dev_id, self.description_key
         )
         self.entity_id = f"{self._attr_ha_platform}.{self._attr_unique_id}"
 
@@ -65,12 +65,11 @@ class EltakoEntity(Entity):
             "[%s] Added entity %s (%s)", self.dev_id, self.dev_name, type(self).__name__
         )
 
-    @classmethod
+    @staticmethod
     def _get_identifier(
-        cls,
         gateway: EnOceanGateway,
         dev_id: AddressExpression,
-        description_key: str = None,
+        description_key: str | None = None,
     ) -> str:
         if description_key is None:
             description_key = ""
@@ -85,15 +84,11 @@ class EltakoEntity(Entity):
             .lower()
         )
 
-    def _get_description_key(self, description_key: str = None):
-        if description_key is not None:
-            self.description_key = description_key
-
-        if hasattr(self, "entity_description") and self.entity_description is not None:
-            if self.description_key is None:
-                self.description_key = self.entity_description.key
-
-        return self.description_key
+    def _set_description_key(self, description_key: str | None) -> str | None:
+        if getattr(self, "entity_description", None) is not None:
+            if description_key is None:
+                return self.entity_description.key
+        return description_key
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -181,17 +176,10 @@ class EltakoEntity(Entity):
         """Return the id of device."""
         return self._attr_dev_id
 
-    # @property
-    # def identifier(self) -> str:
-    #     """Return the identifier of device."""
-    #     return EltakoEntity._get_identifier(self.gateway, self.dev_id, self.description_key)
-
     @property
     def unique_id(self) -> str:
         """Return the unique id of device."""
-        return EltakoEntity._get_identifier(
-            self.gateway, self.dev_id, self.description_key
-        )
+        return self._attr_unique_id
 
     def _message_received_callback(self, msg: ESP2Message) -> None:
         """Handle incoming messages."""

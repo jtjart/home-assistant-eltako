@@ -48,7 +48,7 @@ async def async_setup_entry(
 class GatewayLastReceivedMessage(EltakoEntity, DateTimeEntity):
     """Protocols last time when message received."""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway):
+    def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         self.entity_description = EntityDescription(
             key="Last Message Received",
             name="Last Message Received",

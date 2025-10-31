@@ -136,7 +136,7 @@ class EltakoDimmableLight(AbstractLightEntity):
         dev_eep: EEP,
         sender_id: AddressExpression,
         sender_eep: EEP,
-    ):
+    ) -> None:
         """Initialize the Eltako light source."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep)
         self._sender_id = sender_id
@@ -285,7 +285,7 @@ class EltakoSwitchableLight(AbstractLightEntity):
         dev_eep: EEP,
         sender_id: AddressExpression,
         sender_eep: EEP,
-    ):
+    ) -> None:
         """Initialize the Eltako light source."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep)
         self._sender_id = sender_id

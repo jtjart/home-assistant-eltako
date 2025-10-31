@@ -117,7 +117,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
         time_closes,
         time_opens,
         time_tilts,
-    ):
+    ) -> None:
         """Initialize the Eltako cover device."""
         super().__init__(platform, gateway, dev_id, dev_name, dev_eep)
         self._sender_id = sender_id

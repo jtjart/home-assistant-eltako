@@ -233,7 +233,7 @@ class EltakoBinarySensor(AbstractBinarySensor):
         device_class: str,
         invert_signal: bool,
         description: EntityDescription = None,
-    ):
+    ) -> None:
         """Initialize the Eltako binary sensor."""
         if description:
             self.entity_description = EntityDescription(
@@ -501,7 +501,7 @@ class EltakoBinarySensor(AbstractBinarySensor):
 class GatewayConnectionState(AbstractBinarySensor):
     """Protocols last time when message received."""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway):
+    def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         key = "Gateway_Connection_State"
 
         self._attr_icon = "mdi:connection"

@@ -265,7 +265,7 @@ class SensorSchema(EltakoPlatformSchema):
                 vol.Required(CONF_EEP): vol.In(CONF_EEP_SUPPORTED),
                 vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
                 vol.Optional(CONF_LANGUAGE, default="en"): vol.In(
-                    [v for v in LANGUAGE_ABBREVIATION]
+                    list(LANGUAGE_ABBREVIATION)
                 ),
                 vol.Optional(CONF_VOC_TYPE_INDEXES, default=[0]): vol.All(
                     cv.ensure_list, [vol.In([v.index for v in VOC_SubstancesType])]

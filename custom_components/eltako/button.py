@@ -120,7 +120,7 @@ class TeachInButton(AbstractButton):
         dev_eep: EEP,
         sender_id: AddressExpression,
         sender_eep: EEP,
-    ):
+    ) -> None:
         _dev_name = dev_name
         if _dev_name == "":
             _dev_name = "teach-in-button"
@@ -151,7 +151,7 @@ class TeachInButton(AbstractButton):
 class GatewayReconnectButton(AbstractButton):
     """Button for reconnecting serial bus."""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway):
+    def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         self.entity_description = ButtonEntityDescription(
             key="gateway_" + str(gateway.dev_id) + "Serial Reconnection",
             name="Reconnect Gateway " + str(gateway.dev_id),
