@@ -28,14 +28,13 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up an Eltako buttons."""
+    """Set up datetime entities for Eltako integration."""
     gateway: EnOceanGateway = get_gateway_from_hass(hass, config_entry)
 
     entities: list[EltakoEntity] = []
 
     platform = Platform.DATE
 
-    # last received message timestamp
     entities.append(GatewayLastReceivedMessage(platform, gateway))
 
     validate_actuators_dev_and_sender_id(entities)
