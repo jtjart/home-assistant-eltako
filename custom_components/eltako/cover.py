@@ -221,14 +221,14 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
     def open_cover(self, **kwargs: Any) -> None:
         """Open the cover."""
         if self._time_opens is not None:
-            time = self._time_opens + 1
+            moving_time = self._time_opens + 1
         else:
-            time = 255
+            moving_time = 255
 
         address, _ = self._sender_id
 
         if self._sender_eep == H5_3F_7F:
-            msg = H5_3F_7F(time, 0x01, 1).encode_message(address)
+            msg = H5_3F_7F(moving_time, 0x01, 1).encode_message(address)
             self.send_message(msg)
 
         else:
@@ -250,14 +250,14 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
     def close_cover(self, **kwargs: Any) -> None:
         """Close cover."""
         if self._time_closes is not None:
-            time = self._time_closes + 1
+            moving_time = self._time_closes + 1
         else:
-            time = 255
+            moving_time = 255
 
         address, _ = self._sender_id
 
         if self._sender_eep == H5_3F_7F:
-            msg = H5_3F_7F(time, 0x02, 1).encode_message(address)
+            msg = H5_3F_7F(moving_time, 0x02, 1).encode_message(address)
             self.send_message(msg)
 
         else:
@@ -286,15 +286,16 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
 
         if position == self._attr_current_cover_position:
             return
-        elif position == 100:
+
+        if position == 100:
             direction = "up"
-            time = self._time_opens + 1
+            moving_time = self._time_opens + 1
         elif position == 0:
             direction = "down"
-            time = self._time_closes + 1
+            moving_time = self._time_closes + 1
         elif position > self._attr_current_cover_position:
             direction = "up"
-            time = max(
+            moving_time = max(
                 1,
                 min(
                     int(
@@ -307,7 +308,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             # try to prevent covers moving completely up or down when time = 0
         elif position < self._attr_current_cover_position:
             direction = "down"
-            time = max(
+            moving_time = max(
                 1,
                 min(
                     int(
@@ -325,7 +326,7 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
             elif direction == "down":
                 command = 0x02
 
-            msg = H5_3F_7F(time, command, 1).encode_message(address)
+            msg = H5_3F_7F(moving_time, command, 1).encode_message(address)
             self.send_message(msg)
 
         else:

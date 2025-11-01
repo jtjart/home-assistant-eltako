@@ -430,18 +430,18 @@ async def async_setup_entry(
                     if dev_name == "":
                         dev_name = DEFAULT_DEVICE_NAME_ELECTRICITY_METER
 
-                    for tariff in dev_conf.get(CONF_METER_TARIFFS, []):
-                        entities.append(
-                            EltakoMeterSensor(
-                                platform,
-                                gateway,
-                                dev_conf.id,
-                                dev_name,
-                                dev_conf.eep,
-                                SENSOR_DESC_ELECTRICITY_CUMULATIVE,
-                                tariff=(tariff - 1),
-                            )
+                    entities.extend(
+                        EltakoMeterSensor(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            SENSOR_DESC_ELECTRICITY_CUMULATIVE,
+                            tariff=(tariff - 1),
                         )
+                        for tariff in dev_conf.get(CONF_METER_TARIFFS, [])
+                    )
                     _tariff_in_name = dev_conf.get(CONF_METER_TARIFFS, []) != []
                     entities.append(
                         EltakoMeterSensor(
@@ -544,19 +544,19 @@ async def async_setup_entry(
 
                 elif dev_conf.eep in [A5_09_0C]:
                     ### Eltako FLGTF only supports VOCT Total
-                    for t in VOC_SubstancesType:
-                        if t.index in entity_config[CONF_VOC_TYPE_INDEXES]:
-                            entities.append(
-                                EltakoAirQualitySensor(
-                                    platform,
-                                    gateway,
-                                    dev_conf.id,
-                                    dev_name,
-                                    dev_conf.eep,
-                                    t,
-                                    entity_config[CONF_LANGUAGE],
-                                )
-                            )
+                    entities.extend(
+                        EltakoAirQualitySensor(
+                            platform,
+                            gateway,
+                            dev_conf.id,
+                            dev_name,
+                            dev_conf.eep,
+                            t,
+                            entity_config[CONF_LANGUAGE],
+                        )
+                        for t in VOC_SubstancesType
+                        if t.index in entity_config[CONF_VOC_TYPE_INDEXES]
+                    )
 
                 elif dev_conf.eep in [A5_07_01]:
                     entities.append(
@@ -892,6 +892,7 @@ class EltakoMeterSensor(EltakoSensor):
 
     def value_changed(self, msg: ESP2Message):
         """Update the internal state of the sensor.
+
         For cumulative values, we alway respect the channel.
         For current values, we respect the channel just for gas and water.
         """
@@ -1319,7 +1320,7 @@ class EltakoAirQualitySensor(EltakoSensor):
 class GatewayLastReceivedMessage(EltakoSensor):
     """Protocols last time when message received."""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway):
+    def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         super().__init__(
             platform,
             gateway,
@@ -1351,7 +1352,7 @@ class GatewayLastReceivedMessage(EltakoSensor):
     async def async_value_changed(self, value: datetime) -> None:
         try:
             self.value_changed(value)
-        except AttributeError as e:
+        except AttributeError:
             # Home Assistant not ready yet
             pass
 
@@ -1366,7 +1367,7 @@ class GatewayLastReceivedMessage(EltakoSensor):
 class GatewayReceivedMessagesInActiveSession(EltakoSensor):
     """Protocols amount of messages per session."""
 
-    def __init__(self, platform: str, gateway: EnOceanGateway):
+    def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         super().__init__(
             platform,
             gateway,
@@ -1425,7 +1426,7 @@ class StaticInfoField(EltakoSensor):
         key: str,
         value: str,
         icon: str = None,
-    ):
+    ) -> None:
         super().__init__(
             platform,
             gateway,
@@ -1456,7 +1457,7 @@ class GatewayInfoField(StaticInfoField):
         key: str,
         value: str,
         icon: str = None,
-    ):
+    ) -> None:
         super().__init__(
             platform,
             gateway,
@@ -1494,7 +1495,7 @@ class EventListenerInfoField(EltakoSensor):
         key: str,
         convert_event_function,
         icon: str = None,
-    ):
+    ) -> None:
         super().__init__(
             platform,
             gateway,

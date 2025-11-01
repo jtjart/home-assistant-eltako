@@ -69,13 +69,13 @@ class LANGUAGE_ABBREVIATION(StrEnum):
 
 
 PLATFORMS: Final = [
-    Platform.LIGHT,
     Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.CLIMATE,
+    Platform.COVER,
+    Platform.LIGHT,
     Platform.SENSOR,
     Platform.SWITCH,
-    Platform.COVER,
-    Platform.CLIMATE,
-    Platform.BUTTON,
 ]
 
 

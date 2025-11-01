@@ -162,11 +162,6 @@ class EltakoEntity(Entity):
         return self._attr_dev_eep
 
     @property
-    def dev_id(self) -> AddressExpression:
-        """Return the id of device."""
-        return self._attr_dev_id
-
-    @property
     def gateway(self) -> EnOceanGateway:
         """Return the supporting gateway of device."""
         return self._attr_gateway
