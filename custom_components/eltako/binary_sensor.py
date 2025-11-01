@@ -272,7 +272,7 @@ class EltakoBinarySensor(AbstractBinarySensor):
         try:
             decoded = self.dev_eep.decode_message(msg)
             _LOGGER.debug("decoded : %s", json.dumps(decoded.__dict__))
-        except Exception as e:
+        except Exception:
             _LOGGER.warning(
                 "[%s] Could not decode message for eep %s does not fit to message type %s (org %s)",
                 self.dev_id,
@@ -530,7 +530,7 @@ class GatewayConnectionState(AbstractBinarySensor):
     async def async_value_changed(self, connected: bool) -> None:
         try:
             self.value_changed(connected)
-        except AttributeError as e:
+        except AttributeError:
             # Home Assistant is not ready yet
             pass
 

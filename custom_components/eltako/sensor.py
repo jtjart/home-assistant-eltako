@@ -1402,7 +1402,7 @@ class GatewayReceivedMessagesInActiveSession(EltakoSensor):
     async def async_value_changed(self, value: int) -> None:
         try:
             self.value_changed(value)
-        except AttributeError as e:
+        except AttributeError:
             # Home Assistant not ready yet
             pass
 

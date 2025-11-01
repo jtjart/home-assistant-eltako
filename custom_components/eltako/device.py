@@ -216,7 +216,8 @@ def log_entities_to_be_added(entities: list[EltakoEntity], platform: Platform) -
         if e.dev_eep:
             temp_eep = f"eep: {e.dev_eep.eep_string}),"
         _LOGGER.debug(
-            "Add entity %s (id: %s,%s gw: %s) to Home Assistant",
+            "[%s] Add entity %s (id: %s,%s gw: %s) to Home Assistant",
+            platform,
             e.dev_name,
             e.dev_id,
             temp_eep,
