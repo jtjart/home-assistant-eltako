@@ -80,14 +80,10 @@ PLATFORMS: Final = [
 
 
 class GatewayDeviceType(str, Enum):
-    GatewayEltakoFAM14 = "fam14"
-    GatewayEltakoFGW14USB = "fgw14usb"
-    GatewayEltakoFAMUSB = "fam-usb"  # ESP2 transceiver: https://www.eltako.com/en/product/professional-standard-en/three-phase-energy-meters-and-one-phase-energy-meters/fam-usb/
-    EnOceanUSB300 = "enocean-usb300"  # not yet supported
     EltakoFAM14 = "fam14"
     EltakoFGW14USB = "fgw14usb"
-    EltakoFAMUSB = "fam-usb"
-    USB300 = "enocean-usb300"
+    EltakoFAMUSB = "fam-usb"  # ESP2 transceiver: https://www.eltako.com/en/product/professional-standard-en/three-phase-energy-meters-and-one-phase-energy-meters/fam-usb/
+    USB300 = "enocean-usb300"  # not yet supported
     ESP3 = "esp3-gateway"
     LAN = "mgw-lan"
 
@@ -101,8 +97,7 @@ class GatewayDeviceType(str, Enum):
     @classmethod
     def is_transceiver(cls, dev_type) -> bool:
         return dev_type in [
-            GatewayDeviceType.GatewayEltakoFAMUSB,
-            GatewayDeviceType.EnOceanUSB300,
+            GatewayDeviceType.EltakoFAMUSB,
             GatewayDeviceType.USB300,
             GatewayDeviceType.ESP3,
         ]
@@ -110,22 +105,17 @@ class GatewayDeviceType(str, Enum):
     @classmethod
     def is_bus_gateway(cls, dev_type) -> bool:
         return dev_type in [
-            GatewayDeviceType.GatewayEltakoFAM14,
-            GatewayDeviceType.GatewayEltakoFGW14USB,
             GatewayDeviceType.EltakoFAM14,
-            GatewayDeviceType.EltakoFAMUSB,
             GatewayDeviceType.EltakoFGW14USB,
+            GatewayDeviceType.EltakoFAMUSB,
         ]
 
     @classmethod
     def is_esp2_gateway(cls, dev_type) -> bool:
         return dev_type in [
-            GatewayDeviceType.GatewayEltakoFAM14,
-            GatewayDeviceType.GatewayEltakoFGW14USB,
-            GatewayDeviceType.GatewayEltakoFAMUSB,
             GatewayDeviceType.EltakoFAM14,
-            GatewayDeviceType.EltakoFAMUSB,
             GatewayDeviceType.EltakoFGW14USB,
+            GatewayDeviceType.EltakoFAMUSB,
         ]
 
     @classmethod
@@ -134,10 +124,6 @@ class GatewayDeviceType(str, Enum):
 
 
 BAUD_RATE_DEVICE_TYPE_MAPPING: dict = {
-    GatewayDeviceType.GatewayEltakoFAM14: 57600,
-    GatewayDeviceType.GatewayEltakoFGW14USB: 57600,
-    GatewayDeviceType.GatewayEltakoFAMUSB: 9600,
-    GatewayDeviceType.EnOceanUSB300: 57600,
     GatewayDeviceType.EltakoFAM14: 57600,
     GatewayDeviceType.EltakoFGW14USB: 57600,
     GatewayDeviceType.EltakoFAMUSB: 9600,
