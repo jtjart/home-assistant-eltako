@@ -1,18 +1,17 @@
 """Support for Eltako datetime entities."""
 
-import datetime
+from datetime import datetime
 import logging
 
-from homeassistant import config_entries
 from homeassistant.components.datetime import DateTimeEntity
 from homeassistant.components.sensor import SensorDeviceClass
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, State
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType
 
-from . import get_device_config_for_gateway, get_gateway_from_hass
+from . import get_gateway_from_hass
 from .const import DOMAIN, MANUFACTURER
 from .device import (
     EltakoEntity,
@@ -26,12 +25,11 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    config_entry: config_entries.ConfigEntry,
+    config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up an Eltako buttons."""
     gateway: EnOceanGateway = get_gateway_from_hass(hass, config_entry)
-    config: ConfigType = get_device_config_for_gateway(hass, gateway)
 
     entities: list[EltakoEntity] = []
 
@@ -49,6 +47,7 @@ class GatewayLastReceivedMessage(EltakoEntity, DateTimeEntity):
     """Protocols last time when message received."""
 
     def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
+        """Initialize the datetime entity for storing the last time a gateway message was received."""
         self.entity_description = EntityDescription(
             key="Last Message Received",
             name="Last Message Received",
@@ -58,28 +57,6 @@ class GatewayLastReceivedMessage(EltakoEntity, DateTimeEntity):
         self.gateway.set_last_message_received_handler(self.set_value)
 
         super().__init__(platform, gateway, gateway.base_id, gateway.dev_name, None)
-
-    def load_value_initially(self, latest_state: State):
-        try:
-            if latest_state.state == "unknown":
-                self._attr_native_value = None
-            else:
-                # e.g.: 2024-02-12T23:32:44+00:00
-                self._attr_native_value = datetime.strptime(
-                    latest_state.state, "%Y-%m-%dT%H:%M:%S%z:%f"
-                )
-
-        except Exception as e:
-            self._attr_native_value = None
-            raise e
-
-        self.schedule_update_ha_state()
-        _LOGGER.debug(
-            "[%s] value initially loaded: [native_value: %s, state: %s]",
-            self.dev_id,
-            self.native_value,
-            self.state,
-        )
 
     @property
     def device_info(self) -> DeviceInfo:
