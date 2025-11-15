@@ -16,17 +16,9 @@ from homeassistant.components.cover import (
     CoverEntity,
     CoverEntityFeature,
 )
-from homeassistant.const import (
-    CONF_DEVICE_CLASS,
-    STATE_CLOSED,
-    STATE_CLOSING,
-    STATE_OPEN,
-    STATE_OPENING,
-    Platform,
-)
-from homeassistant.core import HomeAssistant, State
+from homeassistant.const import CONF_DEVICE_CLASS, Platform
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
@@ -101,7 +93,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
+class EltakoCover(EltakoEntity, CoverEntity):
     """Representation of an Eltako cover device."""
 
     def __init__(
@@ -142,81 +134,6 @@ class EltakoCover(EltakoEntity, CoverEntity, RestoreEntity):
 
         if time_closes is not None and time_opens is not None:
             self._attr_supported_features |= CoverEntityFeature.SET_POSITION
-
-    def load_value_initially(self, latest_state: State):
-        try:
-            self._attr_current_cover_position = latest_state.attributes.get(
-                "current_position", None
-            )
-            self._attr_current_cover_tilt_position = latest_state.attributes.get(
-                "current_tilt_position", None
-            )
-
-            if (
-                self._attr_current_cover_position is None
-                or self._attr_current_cover_tilt_position is None
-            ):
-                _LOGGER.warning(
-                    "[%s] Missing 'current_position' or 'current_tilt_position' in latest_state.attributes. Defaulting to None",
-                    self.dev_id,
-                )
-
-            if latest_state.state == STATE_OPEN:
-                self._attr_is_opening = False
-                self._attr_is_closing = False
-                self._attr_is_closed = False
-                self._attr_current_cover_position = 100
-                self._attr_current_cover_tilt_position = 100
-            elif latest_state.state == STATE_CLOSED:
-                self._attr_is_opening = False
-                self._attr_is_closing = False
-                self._attr_is_closed = True
-                self._attr_current_cover_position = 0
-                self._attr_current_cover_tilt_position = 0
-            elif latest_state.state == STATE_CLOSING:
-                self._attr_is_opening = False
-                self._attr_is_closing = True
-                self._attr_is_closed = False
-            elif latest_state.state == STATE_OPENING:
-                self._attr_is_opening = True
-                self._attr_is_closing = False
-                self._attr_is_closed = False
-            else:
-                _LOGGER.warning(
-                    "[%s] Unknown state: %s", self.dev_id, latest_state.state
-                )
-
-        except KeyError as e:
-            _LOGGER.error(
-                "[%s] KeyError while accessing attributes: %s", self.dev_id, e
-            )
-            self._attr_current_cover_position = None
-            self._attr_current_cover_tilt_position = None
-            self._attr_is_opening = None
-            self._attr_is_closing = None
-            self._attr_is_closed = None
-        except Exception as e:
-            _LOGGER.error(
-                "[%s] Unexpected error in load_value_initially: %s", self.dev_id, e
-            )
-            self._attr_current_cover_position = None
-            self._attr_current_cover_tilt_position = None
-            self._attr_is_opening = None
-            self._attr_is_closing = None
-            self._attr_is_closed = None
-            raise e
-
-        self.schedule_update_ha_state()
-        _LOGGER.debug(
-            "[%s] value initially loaded: [is_opening: %s, is_closing: %s, is_closed: %s, current_possition: %s, current_tilt_position: %s, state: %s]",
-            self.dev_id,
-            self.is_opening,
-            self.is_closing,
-            self.is_closed,
-            self._attr_current_cover_position,
-            self._attr_current_cover_tilt_position,
-            self.state,
-        )
 
     def open_cover(self, **kwargs: Any) -> None:
         """Open the cover."""

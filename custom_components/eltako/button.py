@@ -103,12 +103,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class AbstractButton(EltakoEntity, ButtonEntity):
-    def load_value_initially(self, latest_state: State):
-        pass
-
-
-class TeachInButton(AbstractButton):
+class TeachInButton(EltakoEntity, ButtonEntity):
     """Button which sends teach-in telegram."""
 
     def __init__(
@@ -148,7 +143,7 @@ class TeachInButton(AbstractButton):
         self.send_message(msg)
 
 
-class GatewayReconnectButton(AbstractButton):
+class GatewayReconnectButton(EltakoEntity, ButtonEntity):
     """Button for reconnecting serial bus."""
 
     def __init__(self, platform: str, gateway: EnOceanGateway) -> None:

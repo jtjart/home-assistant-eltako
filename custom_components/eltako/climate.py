@@ -18,9 +18,8 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.const import CONF_TEMPERATURE_UNIT, Platform
-from homeassistant.core import HomeAssistant, State
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
@@ -141,7 +140,7 @@ def validate_ids_of_climate(entities: list[EltakoEntity]):
             e.validate_sender_id(e.cooling_sender_id)
 
 
-class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
+class ClimateController(EltakoEntity, ClimateEntity):
     """Representation of an Eltako heating and cooling actor."""
 
     _update_frequency = 55  # sec
@@ -210,44 +209,6 @@ class ClimateController(EltakoEntity, ClimateEntity, RestoreEntity):
         self._loop = asyncio.get_event_loop()
         self._update_task = asyncio.ensure_future(
             self._wrapped_update(), loop=self._loop
-        )
-
-    def load_value_initially(self, latest_state: State):
-        try:
-            self.hvac_modes = []
-            for m_str in latest_state.attributes.get("hvac_modes", []):
-                for m_enum in HVACMode:
-                    if m_str == m_enum.value:
-                        self.hvac_modes.append(m_enum)
-
-            self._attr_current_temperature = latest_state.attributes.get(
-                "current_temperature", None
-            )
-            self._attr_target_temperature = latest_state.attributes.get(
-                "temperature", None
-            )
-
-            self._attr_hvac_mode = None
-            for m_enum in HVACMode:
-                if latest_state.state == m_enum.value:
-                    self._attr_hvac_mode = m_enum
-                    break
-
-        except Exception as e:
-            self._attr_hvac_mode = None
-            self._attr_current_temperature = None
-            self._attr_target_temperature = None
-            raise e
-
-        self.schedule_update_ha_state()
-
-        _LOGGER.debug(
-            "[%s] value initially loaded: [state: %s, modes: [%s], current temp: %s, target temp: %s]",
-            self.dev_id,
-            self.state,
-            self.hvac_modes,
-            self.current_temperature,
-            self.target_temperature,
         )
 
     async def _wrapped_update(self, *args) -> None:

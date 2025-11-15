@@ -54,10 +54,9 @@ from homeassistant.const import (
     UnitOfVolume,
     UnitOfVolumeFlowRate,
 )
-from homeassistant.core import HomeAssistant, State
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
@@ -716,7 +715,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
+class EltakoSensor(EltakoEntity, SensorEntity):
     """Representation of an  Eltako sensor device such as a power meter."""
 
     def __init__(
@@ -739,62 +738,6 @@ class EltakoSensor(EltakoEntity, RestoreEntity, SensorEntity):
     def name(self):
         """Return the default name for the sensor."""
         return self.entity_description.name
-
-    def load_value_initially(self, latest_state: State):
-        _LOGGER.debug(
-            "[%s] eneity unique_id: %s",
-            self.dev_id,
-            self.unique_id,
-        )
-        _LOGGER.debug(
-            "[%s] latest state - state: %s",
-            self.dev_id,
-            latest_state.state,
-        )
-        _LOGGER.debug(
-            "[%s] latest state - attributes: %s",
-            self.dev_id,
-            latest_state.attributes,
-        )
-        try:
-            if latest_state.state == "unknown":
-                self._attr_is_on = None
-            elif latest_state.attributes.get("state_class", None) == "measurement":
-                if latest_state.state.count(".") + latest_state.state.count(",") == 1:
-                    self._attr_native_value = float(latest_state.state)
-                elif (
-                    latest_state.state.count(".") == 0
-                    and latest_state.state.count(",") == 0
-                ):
-                    self._attr_native_value = int(latest_state.state)
-                else:
-                    self._attr_native_value = None
-
-            elif latest_state.attributes.get("state_class", None) == "total_increasing":
-                self._attr_native_value = int(latest_state.state)
-
-            elif latest_state.attributes.get("device_class", None) == "device_class":
-                # e.g.: 2024-02-12T23:32:44+00:00
-                self._attr_native_value = datetime.strptime(
-                    latest_state.state, "%Y-%m-%dT%H:%M:%S%z:%f"
-                )
-
-        except Exception as e:
-            if hasattr(self, "_attr_is_on"):
-                self._attr_is_on = None
-            elif hasattr(self, "_attr_native_value"):
-                self._attr_native_value = None
-            raise e
-
-        self.schedule_update_ha_state()
-
-        _LOGGER.debug(
-            "[%s (%s)] value initially loaded: [native_value: %s, state: %s]",
-            self.dev_id,
-            type(self).__name__,
-            self.native_value,
-            self.state,
-        )
 
 
 class EltakoPirSensor(EltakoSensor):

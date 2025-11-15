@@ -19,9 +19,8 @@ from eltakobus.util import AddressExpression
 from homeassistant import config_entries
 from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, State
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.typing import ConfigType
 
 from . import config_helpers, get_device_config_for_gateway, get_gateway_from_hass
@@ -93,35 +92,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class AbstractLightEntity(EltakoEntity, LightEntity, RestoreEntity):
-    def load_value_initially(self, latest_state: State):
-        try:
-            if latest_state.state == "unknown":
-                self._attr_is_on = None
-            else:
-                if latest_state.state in ["on", "off"]:
-                    self._attr_is_on = latest_state.state == "on"
-                else:
-                    self._attr_is_on = None
-
-                self._attr_brightness = latest_state.attributes.get("brightness", None)
-
-        except Exception as e:
-            self._attr_is_on = None
-            raise e
-
-        self.schedule_update_ha_state()
-
-        _LOGGER.debug(
-            "[%s] value initially loaded: [is_on: %s, brightness: %s, state: %s]",
-            self.dev_id,
-            self.is_on,
-            self.brightness,
-            self.state,
-        )
-
-
-class EltakoDimmableLight(AbstractLightEntity):
+class EltakoDimmableLight(EltakoEntity, LightEntity):
     """Representation of an Eltako light source."""
 
     _attr_color_mode = ColorMode.BRIGHTNESS
@@ -270,7 +241,7 @@ class EltakoDimmableLight(AbstractLightEntity):
             )
 
 
-class EltakoSwitchableLight(AbstractLightEntity):
+class EltakoSwitchableLight(EltakoEntity, LightEntity):
     """Representation of an Eltako light source."""
 
     _attr_color_mode = ColorMode.ONOFF

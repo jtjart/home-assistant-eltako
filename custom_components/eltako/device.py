@@ -15,11 +15,10 @@ from eltakobus.message import (
 from eltakobus.util import AddressExpression
 
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, State
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, dispatcher_send
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.entity_platform import DATA_ENTITY_PLATFORM
-from homeassistant.helpers.restore_state import RestoreEntity
 
 from . import config_helpers
 from .const import DOMAIN, MANUFACTURER, SIGNAL_RECEIVE_MESSAGE, SIGNAL_SEND_MESSAGE
@@ -113,30 +112,6 @@ class EltakoEntity(Entity):
             async_dispatcher_connect(
                 self.hass, event_id, self._message_received_callback
             )
-        )
-
-        # load initial value
-        if isinstance(self, RestoreEntity):
-            # check if value is not set
-            is_value_available = getattr(self, "_attr_native_value", None)
-            if is_value_available is None:
-                is_value_available = getattr(self, "_attr_is_on", None)
-
-            # update values
-            if is_value_available is None:
-                latest_state: State = await self.async_get_last_state()
-                if latest_state is not None:
-                    self.load_value_initially(latest_state)
-
-    def load_value_initially(self, latest_state: State):
-        """This function is implemented in the concrete devices classes."""
-        _LOGGER.warning(
-            "[%s] DOES NOT HAVE AN IMPLEMENTATION FOR: load_value_initially()",
-            self.dev_id,
-        )
-        _LOGGER.debug("[%s] latest state - state: %s", self.dev_id, latest_state.state)
-        _LOGGER.debug(
-            "[%s] latest state - attributes: %s", self.dev_id, latest_state.attributes
         )
 
     def validate_dev_id(self) -> bool:
