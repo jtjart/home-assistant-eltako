@@ -45,6 +45,7 @@ from homeassistant.const import (
     PERCENTAGE,
     STATE_CLOSED,
     STATE_OPEN,
+    EntityCategory,
     Platform,
     UnitOfElectricPotential,
     UnitOfEnergy,
@@ -1263,6 +1264,8 @@ class EltakoAirQualitySensor(EltakoSensor):
 class GatewayLastReceivedMessage(EltakoSensor):
     """Protocols last time when message received."""
 
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
     def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         super().__init__(
             platform,
@@ -1309,6 +1312,8 @@ class GatewayLastReceivedMessage(EltakoSensor):
 
 class GatewayReceivedMessagesInActiveSession(EltakoSensor):
     """Protocols amount of messages per session."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         super().__init__(
@@ -1358,6 +1363,8 @@ class GatewayReceivedMessagesInActiveSession(EltakoSensor):
 
 class StaticInfoField(EltakoSensor):
     """Key value fields for gateway information."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self,

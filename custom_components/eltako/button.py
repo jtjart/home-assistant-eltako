@@ -14,8 +14,8 @@ from homeassistant.components.button import (
     ButtonEntity,
     ButtonEntityDescription,
 )
-from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant, State
+from homeassistant.const import EntityCategory, Platform
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType
@@ -106,6 +106,8 @@ async def async_setup_entry(
 class TeachInButton(EltakoEntity, ButtonEntity):
     """Button which sends teach-in telegram."""
 
+    _attr_entity_category = EntityCategory.CONFIG
+
     def __init__(
         self,
         platform: str,
@@ -145,6 +147,8 @@ class TeachInButton(EltakoEntity, ButtonEntity):
 
 class GatewayReconnectButton(EltakoEntity, ButtonEntity):
     """Button for reconnecting serial bus."""
+
+    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(self, platform: str, gateway: EnOceanGateway) -> None:
         self.entity_description = ButtonEntityDescription(
